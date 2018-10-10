@@ -57,11 +57,27 @@ for tag in all_tags:
         tag_count[tag]=1
 
 lists = sorted(tag_count.items())
-x, y = zip(*lists) # unpack a list of pairs into two tuples
+tag_label, y = zip(*lists) # unpack a list of pairs into two tuples
+x=[]
 
-plt.plot(x, y)
+for i in range(len(y)):
+    x.append(i+1)
+
+#plt.plot(x, y)
+#plt.show()
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+
+line, = ax.plot(x, y, lw=2)
+
+for i in range(len(y)):
+    if(y[i]>4000):
+        ax.annotate(tag_label[i], xy=(x[i], y[i]), xytext=(x[i], y[i]+1000),
+            arrowprops=dict(facecolor='black', shrink=0.05),
+            )
+
 plt.show()
-
 ##################### need to do stratified subsampling #######################
 
 #count = 0
