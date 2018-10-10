@@ -41,22 +41,22 @@ def fetchXMLfiles(source, destination):
     filenames = os.listdir(source)
     for f in filenames:
         file_dict = XMLtoText(source+f)
-        dest = destination+os.path.splitext(f)[0]
+        dest = destination#+os.path.splitext(f)[0]
         if os.path.exists(dest):
             shutil.rmtree(dest)
-             os.makedirs(dest)
-        count=1
+        os.makedirs(dest)
+        pdf_text = ""
         for chapter in file_dict:
-            file_name=dest+"/"+"chapter"+str(count)+".txt"
-            count=count+1
-            with open(file_name, 'w') as f:
-                f.write('{}\n'.format(file_dict[chapter]))
+            pdf_text+=file_dict[chapter]
+        file_name=dest+os.path.splitext(f)[0]+".txt"
+        with open(file_name, 'w') as f:
+            f.write('{}\n'.format(pdf_text))
 
 ##### path to the folder where all the XML files are stored #####
-source = "/home/dhruv/CS5984/text_extraction/XMLFiles/"
+source = "/media/dhruv/New Volume/courses_MS/data_analytics/project/xml_files/"
 
 #### path where you want the text files to be stored ############
-destination = "/home/dhruv/CS5984/text_extraction/textFiles/"
+destination = "/media/dhruv/New Volume/courses_MS/data_analytics/project/text_files/"
 
 #### calling function for extraction process ####################
 fetchXMLfiles(source, destination)
