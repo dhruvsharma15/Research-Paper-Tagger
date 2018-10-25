@@ -80,22 +80,22 @@ for i in range(len(y)):
 plt.show()
 ##################### need to do stratified subsampling #######################
 
-#count = 0
-#for ele in tag_vocab:
-#    tag_ind[ele] = count
-#    count=count + 1
-#
-#count = 0 
-#for paper in data:
-#    if count in ind:
-#        tags = paper["tag"].replace("'",'"')
-#        tags = tags.replace('None', '"None"')
-#        tags_json = json.loads(tags)
-#        label = [0]*len(ind)
-#        for tag in tags_json:
-#            if(re.match(r"""[A-Z]""", tag['term'])!=None or re.match(r"""\d+""", tag['term'])!=None):               
-#                continue
-#            else:
-#                label[tag_ind[tag['term']]] = 1
-#        labels.append(label)
-#    count = count + 1        
+count = 0
+for ele in tag_vocab:
+    tag_ind[ele] = count
+    count=count + 1
+
+count = 0 
+for paper in data:
+    if count in ind:
+        tags = paper["tag"].replace("'",'"')
+        tags = tags.replace('None', '"None"')
+        tags_json = json.loads(tags)
+        label = [0]*len(ind)
+        for tag in tags_json:
+            if(re.match(r"""[A-Z]""", tag['term'])!=None or re.match(r"""\d+""", tag['term'])!=None):               
+                continue
+            else:
+                label[tag_ind[tag['term']]] = 1
+        labels.append(label)
+    count = count + 1        
