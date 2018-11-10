@@ -208,6 +208,10 @@ def write_invalidTags_to_file(invalid):
         for item in invalid:
             f.write("%s\n" % item)
 
+def write_sampledPaperIndex_to_file(papers):
+    with open('./sampledPapers.txt', 'w') as f:
+        for item in papers:
+            f.write("%s\n" % item)
         
 labels, all_tags, tag_ind, abstracts = generate_tags(filename, retrieved_files_indices)
 tag_count = tag_distribution(all_tags)
@@ -220,6 +224,7 @@ subsampled_labels = clean_labels(subsampled_labels, inval_tag_ind)
 
 subsampled_data_distribution(subsampled_labels)
 write_invalidTags_to_file(inval_tags_list)
+write_sampledPaperIndex_to_file(subsampled_papers_ind)
 #write_abstracts_to_file(abstracts, retrieved_files_indices)
 
 
