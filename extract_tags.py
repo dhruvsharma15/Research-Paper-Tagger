@@ -9,18 +9,36 @@ import json
 import re
 import matplotlib.pylab as plt
 import numpy as np
+import os
 
 filename='../arxivData.json'
-data_size = 25000
-threshold = 0.4
+retrieved_files_indices = 'index_sorted.txt'
+threshold = 0.5
+data_size = 10140
 
-def generate_tags(filename, datasize):
+def generate_tags(filename, val_files_ind):
     labels = []
+    abstracts = []
     with open(filename) as f:
-        data = json.load(f)
+        corpus = json.load(f)
     
-    data = data[0:data_size]
+    valid_indices = []
+    with open(val_files_ind, 'r') as f:
+        indices = f.readlines()
+    
+    for i in indices:
+        valid_indices.append(int(i))
+    
+    valid_indices.sort()
+    
+    data = []
     all_tags = []
+    count = 0
+    for c in corpus:
+        if count in valid_indices:
+            data.append(c)
+        count+=1
+
     
     for paper in data:
         tags = paper["tag"].replace("'",'"')
@@ -53,7 +71,11 @@ def generate_tags(filename, datasize):
             else:
                 label[tag_ind[tag['term']]] = 1
         labels.append(label)
-    return labels, all_tags, tag_ind
+        
+        ####################################
+        summary = paper["summary"]
+        abstracts.append(summary)
+    return labels, all_tags, tag_ind, abstracts
 
 def tag_distribution(all_tags):
     tag_count = dict()
@@ -162,9 +184,27 @@ def subsampled_data_distribution(subsampled_labels):
                 arrowprops=dict(facecolor='black', shrink=0.05),
                 )
     
-    plt.show()          
+    plt.show()   
+
+def write_abstracts_to_file(abstracts, val_files_ind):
+    destination = '../abstracts/'
+    
+    valid_indices = []
+    with open(val_files_ind, 'r') as f:
+        indices = f.readlines()
+    for i in indices:
+        valid_indices.append(int(i))
+    valid_indices.sort()
+    
+    count = 0
+    for abst in abstracts:
+        file_name=destination+"file"+str(valid_indices[count])+".txt"
+        with open(file_name, 'w') as f:
+            f.write('{}\n'.format(abst))
+        count+=1
+    
         
-labels, all_tags, tag_ind = generate_tags(filename, data_size)
+labels, all_tags, tag_ind, abstracts = generate_tags(filename, retrieved_files_indices)
 tag_count = tag_distribution(all_tags)
 th_count = find_threshold(tag_count)
 
@@ -175,7 +215,7 @@ subsampled_labels = clean_labels(subsampled_labels, inval_tag_ind)
 
 subsampled_data_distribution(subsampled_labels)
 
-
+#write_abstracts_to_file(abstracts, retrieved_files_indices)
 
 
 
