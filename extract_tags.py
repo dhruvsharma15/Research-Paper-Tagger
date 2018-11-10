@@ -11,7 +11,7 @@ import matplotlib.pylab as plt
 import numpy as np
 import os
 
-filename='../arxivData.json'
+filename='./arxivData.json'
 retrieved_files_indices = 'index_sorted.txt'
 threshold = 0.5
 data_size = 10140
@@ -203,6 +203,11 @@ def write_abstracts_to_file(abstracts, val_files_ind):
             f.write('{}\n'.format(abst))
         count+=1
     
+def write_invalidTags_to_file(invalid):
+    with open('./invalidTags.txt', 'w') as f:
+        for item in invalid:
+            f.write("%s\n" % item)
+
         
 labels, all_tags, tag_ind, abstracts = generate_tags(filename, retrieved_files_indices)
 tag_count = tag_distribution(all_tags)
@@ -214,7 +219,7 @@ subsampled_labels, subsampled_papers_ind = valid_papers(labels, inval_tags_list,
 subsampled_labels = clean_labels(subsampled_labels, inval_tag_ind)
 
 subsampled_data_distribution(subsampled_labels)
-
+write_invalidTags_to_file(inval_tags_list)
 #write_abstracts_to_file(abstracts, retrieved_files_indices)
 
 
