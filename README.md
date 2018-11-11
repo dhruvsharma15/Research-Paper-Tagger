@@ -2,7 +2,7 @@
 
 fastText Pre-Trained Word Vectors: https://fasttext.cc/docs/en/english-vectors.html
 
-fastText Word Representation and Classification Model: https://drive.google.com/drive/folders/1Cp14Syec01bNa8gfgU_aNPI0-HMe1pm2?usp=sharing
+fastText Word Representation, Classification Model, Test file: https://drive.google.com/drive/folders/1Cp14Syec01bNa8gfgU_aNPI0-HMe1pm2?usp=sharing
 
 ## fastText Training Configuration
 | Epochs        | Learning Rate | wordNgrams  |
