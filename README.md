@@ -1,4 +1,4 @@
-# Research-Paper-Tagger
+# CS 5525: Research-Paper-Tagger
 
 fastText Pre-Trained Word Vectors: https://fasttext.cc/docs/en/english-vectors.html
 
