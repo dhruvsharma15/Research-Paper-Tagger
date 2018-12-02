@@ -4,6 +4,10 @@ fastText Pre-Trained Word Vectors: https://fasttext.cc/docs/en/english-vectors.h
 
 fastText Word Representation, Classification Model, Test file: https://drive.google.com/drive/folders/1Cp14Syec01bNa8gfgU_aNPI0-HMe1pm2?usp=sharing
 
+Glove Representation: https://drive.google.com/open?id=1Lgym0TM-PrFBdrEz6IKDA03xjyTsxUzD
+
+Word2Vec Representation: https://drive.google.com/open?id=1oJjjIQ0HRoUvyZC3JRhOjSrV_U6ER1cD 
+
 ## fastText Training Configuration
 | Epochs        | Learning Rate | wordNgrams  |
 | ------------- |:-------------:| -----------:|
