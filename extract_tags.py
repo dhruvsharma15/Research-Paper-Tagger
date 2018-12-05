@@ -10,9 +10,10 @@ import re
 import matplotlib.pylab as plt
 import numpy as np
 import os
+import pickle
 
 filename='./arxivData.json'
-retrieved_files_indices = 'index_sorted.txt'
+retrieved_files_indices = 'val_papers_index.txt'
 threshold = 0.5
 data_size = 10140
 
@@ -219,12 +220,15 @@ th_count = find_threshold(tag_count)
 
 inval_tags_list, inval_tag_ind = invalid_tags(tag_count, threshold)
 
-subsampled_labels, subsampled_papers_ind = valid_papers(labels, inval_tags_list, tag_ind)
-subsampled_labels = clean_labels(subsampled_labels, inval_tag_ind)
+#subsampled_labels, subsampled_papers_ind = valid_papers(labels, inval_tags_list, tag_ind)
+subsampled_labels = clean_labels(labels, inval_tag_ind)
 
-subsampled_data_distribution(subsampled_labels)
-write_invalidTags_to_file(inval_tags_list)
-write_sampledPaperIndex_to_file(subsampled_papers_ind)
+#with open('subsampled_labels.txt', 'wb') as f:
+#    pickle.dump(subsampled_labels, f)
+
+#subsampled_data_distribution(subsampled_labels)
+#write_invalidTags_to_file(inval_tags_list)
+#write_sampledPaperIndex_to_file(subsampled_papers_ind)
 #write_abstracts_to_file(abstracts, retrieved_files_indices)
 
 

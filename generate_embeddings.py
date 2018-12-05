@@ -9,9 +9,10 @@ from glove import Corpus, Glove
 import os
 from collections import Counter
 from nltk.tokenize import word_tokenize
+import pickle
 
 def read_files(data_path):
-    print('print papers')
+    print('reading papers')
     papers = os.listdir(data_path)
     data = []
     
@@ -27,6 +28,9 @@ def get_embeddings(papers, embed_size, window_size, n_epochs):
     tokenized_data = []
     for paper in papers:
         tokenized_data.append(word_tokenize(paper))
+    
+    with open('../tokenized_data.pkl', 'wb') as f:
+        pickle.dump(tokenized_data, f)
     
     corpus = Corpus()
     corpus.fit(tokenized_data, window=window_size)
@@ -56,7 +60,7 @@ def write_vocab_to_file(filename, count_words):
 embedding_size = 1
 window_size = 1
 epochs = 1
-data_path = 'text_Files/'
+data_path = '../text_Files/'
 papers = read_files(data_path)
 glove_vectors, dictionary, tokenized_data = get_embeddings(papers, embedding_size, window_size, epochs)
 count_words = vocab_count(tokenized_data)
