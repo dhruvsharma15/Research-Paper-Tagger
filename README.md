@@ -26,7 +26,10 @@ To Reproduce the results, setup [fastText](https://fasttext.cc/docs/en/support.h
 
 ## Required Dependencies
 Use the following commands to install the required packages:
+
 `pip install -r requirements.txt`
+
+All the Machine Learning Models in the directory ML_models can be run by their respective python scripts.
 
 ## Word2Vec Representation
 ![alt text](https://github.com/namanahuja/Research-Paper-Tagger/blob/master/media/w2v.png)
