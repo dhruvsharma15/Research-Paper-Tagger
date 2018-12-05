@@ -140,7 +140,7 @@ data['content'] = data['content'].apply(cleanHtml)
 data['content'] = data['content'].apply(cleanPunc)
 data['content'] = data['content'].apply(keepAlpha)
 data.head()
-data = data[:4000]
+data = data[:2000]
 print("Data Processed")
 # In[73]:
 
@@ -221,22 +221,24 @@ from sklearn.metrics import jaccard_similarity_score
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
 
+
 from datetime import timedelta
 import time
+from sklearn.naive_bayes import GaussianNB
+from skmultilearn.ensemble import RakelO
+
+classifier = RakelO(
+    base_classifier=GaussianNB(),
+    base_classifier_require_dense=[True, True],
+    labelset_size=y_train.shape[1] // 4,
+    model_count=6
+)
+
+
 start = time.time()
 
-from scipy.sparse import csr_matrix, lil_matrix
-from skmultilearn.adapt import MLkNN
-x_train = lil_matrix(x_train).toarray()
-y_train = lil_matrix(y_train).toarray()
-x_test = lil_matrix(x_test).toarray()
 
-# train
-from skmultilearn.adapt import BRkNNaClassifier
-
-classifier = BRkNNaClassifier(k=6)
 classifier.fit(x_train, y_train)
-# predict
 predictions = classifier.predict(x_test)
 
 # accuracy
@@ -251,9 +253,9 @@ print("\n")
 print("Precision = ",precision_score(y_test, predictions,average='micro'))
 print("\n")
 
+
 print("Recall = ",recall_score(y_test,predictions,average='micro'))
 print("\n")
-
 print("Hamming Loss = ",hamming_loss(y_test,predictions))
 print("\n")
 

@@ -230,11 +230,12 @@ from skmultilearn.adapt import MLkNN
 x_train = lil_matrix(x_train).toarray()
 y_train = lil_matrix(y_train).toarray()
 x_test = lil_matrix(x_test).toarray()
+classifier = MLkNN(k=4)
 
 # train
-from skmultilearn.adapt import BRkNNaClassifier
+from skmultilearn.adapt import BRkNNbClassifier
 
-classifier = BRkNNaClassifier(k=6)
+classifier = BRkNNbClassifier(k=6)
 classifier.fit(x_train, y_train)
 # predict
 predictions = classifier.predict(x_test)

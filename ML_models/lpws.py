@@ -247,4 +247,7 @@ print("\n")
 print("Recall = ",recall_score(y_test,predictions,average='micro'))
 print("\n")
 
+print("Hamming Loss = ",hamming_loss(y_test,predictions))
+print("\n")
+
 print(timedelta(seconds=time.time()-start))
