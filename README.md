@@ -29,4 +29,4 @@ To Reproduce the results, setup [fastText](https://fasttext.cc/docs/en/support.h
 ## Doc2Vec Representation
 ![alt text](https://github.com/namanahuja/Research-Paper-Tagger/blob/master/media/doc2vec.png)
 ## Evaluation Results
-![alt text](https://github.com/namanahuja/Research-Paper-Tagger/blob/master/media/results.jpg)
+![alt text](https://github.com/namanahuja/Research-Paper-Tagger/blob/master/media/results1.jpg)
