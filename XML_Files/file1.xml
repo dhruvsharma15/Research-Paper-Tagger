@@ -1,0 +1,1078 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://www.tei-c.org/ns/1.0 C:\grobid-0.5.1\grobid-0.5.1\grobid-home/schemas/xsd/Grobid.xsd"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+	<teiHeader xml:lang="en">
+		<encodingDesc>
+			<appInfo>
+				<application version="0.5.1-SNAPSHOT" ident="GROBID" when="2018-11-08T02:40+0000">
+					<ref target="https://github.com/kermitt2/grobid">GROBID - A machine learning software for extracting information from scholarly documents</ref>
+				</application>
+			</appInfo>
+		</encodingDesc>
+		<fileDesc>
+			<titleStmt>
+				<title level="a" type="main">Dual Recurrent Attention Units for Visual Question Answering</title>
+			</titleStmt>
+			<publicationStmt>
+				<publisher/>
+				<availability status="unknown"><licence/></availability>
+				<date type="published" when="2018-02-01">1 Feb 2018</date>
+			</publicationStmt>
+			<sourceDesc>
+				<biblStruct>
+					<analytic>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Ahmed</forename><surname>Osman</surname></persName>
+							<affiliation key="aff0">
+								<orgName type="institution">Fraunhofer Heinrich Hertz Institute</orgName>
+								<address>
+									<settlement>Berlin</settlement>
+									<country key="DE">Germany</country>
+								</address>
+							</affiliation>
+							<affiliation key="aff1">
+								<orgName type="institution">University of Freiburg</orgName>
+								<address>
+									<settlement>Freiburg</settlement>
+									<country key="DE">Germany</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Wojciech</forename><surname>Samek</surname></persName>
+							<affiliation key="aff0">
+								<orgName type="institution">Fraunhofer Heinrich Hertz Institute</orgName>
+								<address>
+									<settlement>Berlin</settlement>
+									<country key="DE">Germany</country>
+								</address>
+							</affiliation>
+						</author>
+						<title level="a" type="main">Dual Recurrent Attention Units for Visual Question Answering</title>
+					</analytic>
+					<monogr>
+						<imprint>
+							<date type="published" when="2018-02-01">1 Feb 2018</date>
+						</imprint>
+					</monogr>
+					<note>Figure 1. Diagram of the DRAU network.</note>
+				</biblStruct>
+			</sourceDesc>
+		</fileDesc>
+		<profileDesc>
+			<abstract>
+				<p>We propose an architecture for VQA which utilizes recurrent layers to generate visual and textual attention. The memory characteristic of the proposed recurrent attention units offers a rich joint embedding of visual and textual features and enables the model to reason relations between several parts of the image and question. Our single model outperforms the first place winner on the VQA 1.0 dataset, performs within margin to the current state-of-the-art ensemble model. We also experiment with replacing attention mechanisms in other state-of-the-art models with our implementation and show increased accuracy. In both cases, our recurrent attention mechanism improves performance in tasks requiring sequential or relational reasoning on the VQA dataset.</p>
+			</abstract>
+		</profileDesc>
+	</teiHeader>
+	<text xml:lang="en">
+		<body>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="1.">Introduction</head><p>Although convolutional neural networks (CNNs) and re- current neural networks (RNNs) have been successfully applied to various image and natural language processing tasks (cf. <ref type="bibr" target="#b0">[1,</ref><ref type="bibr" target="#b2">2,</ref><ref type="bibr" target="#b5">3,</ref><ref type="bibr" target="#b7">4]</ref>), these breakthroughs only slowly translate to multimodal tasks such as visual question an- swering (VQA) where the model needs to create a joint un- derstanding of the image and question. Such multimodal tasks require joint visual and textual representations.</p><p>Since global features can hardly answer questions about certain local parts of the input, attention mechanisms have been extensively used in VQA recently <ref type="bibr" target="#b9">[5,</ref><ref type="bibr" target="#b11">6,</ref><ref type="bibr" target="#b13">7,</ref><ref type="bibr">8,</ref><ref type="bibr">9,</ref><ref type="bibr">10,</ref><ref type="bibr">11,</ref><ref type="bibr">12]</ref>. It attempts to make the model predict based on spatial or lingual context. However, most attention mech- anisms used in VQA models are rather simple, consisting of two convolutional layers followed by a softmax to gen- erate the attention weights which are summed over the im- age features. These shallow attention mechanisms may fail to select the relevant information from the joint representa- tion of the question and image. Creating attention for com- plex questions, particularly sequential or relational reason- ing questions, requires processing information in a sequen- tial manner which recurrent layers are better suited due to their ability to capture relevant information over an input sequence.</p><p>In this paper, we propose a RNN-based joint represen- tation to generate visual and textual attention. We argue that embedding a RNN in the joint representation helps the model process information in a sequential manner and de- termine what is relevant to solve the task. We refer to the combination of RNN embedding and attention as Recurrent Textual Attention Unit (RTAU) and Recurrent Visual Atten- tion Unit (RVAU) respective of their purpose. Furthermore, we employ these units in a fairly simple network, referred to as Dual Recurrent Attention Units (DRAU) network, and show improved results over several baselines. Finally, we enhance state-of-the-art models by replacing the model's default attention mechanism with RVAU.</p><p>Our main contributions are the following:</p><p>• We introduce a novel approach to generate soft atten- tion. To the best of our knowledge, this is the first at- tempt to generate attention maps using recurrent neural networks. We provide quantitative and qualitative re- sults showing performance improvements over the de-fault attention used in most VQA models.</p><p>• Our attention modules are modular, thus, they can sub- stitute existing attention mechanisms in most models fairly easily. We show that state-of-the-art models with RVAU "plugged-in" perform consistently better than their vanilla counterparts.</p><p>joint loss minimization to train the units. However during testing, they use the first answering unit which was trained from other units through backpropagation.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2.">Related Work</head><p>This section discusses common methods that have been explored in the past for VQA.</p><p>Bilinear representations Fukui et al. <ref type="bibr" target="#b13">[7]</ref> use compact bi- linear pooling to attend over the image features and com- bine it with the language representation. The basic concept behind compact bilinear pooling is approximating the outer product by randomly projecting the embeddings to a higher dimensional space using Count Sketch projection <ref type="bibr" target="#b1">[13]</ref> and then exploiting Fast Fourier Transforms to compute an effi- cient convolution. An ensemble model using MCB won first place in VQA (1.0) 2016 challenge. <ref type="bibr">Kim et al. [5]</ref> argues that compact bilinear pooling is still expensive to compute and shows that it can be replaced by element-wise prod- uct (Hadamard product) and a linear mapping (i.e. fully- connected layer) which gives a lower dimensional repre- sentation and also improves the model accuracy. Recently, Ben-younes et al. <ref type="bibr" target="#b3">[14]</ref> proposed using Tucker decomposi- tion <ref type="bibr" target="#b4">[15]</ref> with a low-rank matrix constraint as a bilinear representation. They propose this fusion scheme in an ar- chitecture they refer to as MUTAN which as of this writing is the current state-of-the-art on the VQA 1.0 dataset.</p><p>Notable mentions Kazemi and Elqursh <ref type="bibr" target="#b10">[18]</ref> show that a simple model can get state-of-the-art results with proper training parameters. Wu et al. <ref type="bibr" target="#b12">[19]</ref> construct a textual rep- resentation of the semantic content of an image and merges it with textual information sourced from a knowledge base. Ray et al. <ref type="bibr">[20]</ref> introduce a task of identifying relevant ques- tions for VQA. <ref type="bibr">Kim et al. [21]</ref> apply residual learning tech- niques to VQA and propose a novel attention image atten- tion visualization method using backpropagation.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.">Dual Recurrent Attention in VQA</head><p>We propose our method in this section. <ref type="figure">Figure 1</ref> illus- trates the flow of information in the DRAU model. Given an image and question, we create the input representations v and q. Next, these features are combined by 1 × 1 con- volutions into two separate branches. Then, the branches are passed to an RTAU and RVAU. Finally, the branches are combined using a fusion operation and fed to the final clas- sifier. The full architecture of the network is depicted in <ref type="figure" target="#fig_0">Figure 2</ref>.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.1.">Input Representation</head><p>Attention-based Closely related to our work, Lu et al. <ref type="bibr">[9]</ref> were the first to feature a co-attention mechanism that ap- plies attention to both the question and image. Nam et al.</p><p>[6] use a Dual Attention Network (DAN) that employs at- tention on both text and visual features iteratively to predict the result. The goal behind this is to allow the image and question attentions to iteratively guide each other in a syn- ergistic manner.</p><p>Image representation We use the 152-layer "ResNet" pretrained CNN from He et al. <ref type="bibr" target="#b0">[1]</ref> to extract image features. Similar to <ref type="bibr" target="#b13">[7,</ref><ref type="bibr" target="#b11">6]</ref>, we resize the images to 448 × 448 and extract the last layer before the final pooling layer (res5c) with size 2048 × 14 × 14. Finally, we use l 2 normaliza- tion on all dimensions. Recently, Anderson et al. <ref type="bibr" target="#b17">[22]</ref> have shown that object-level features can provide a significant performance uplift compared to global-level features from pretrained CNNs. Therefore, we experiment with replacing the ResNet features with FRCNN <ref type="bibr" target="#b18">[23]</ref> features with a fixed number of proposals per image (K = 36).</p><p>RNNs for VQA Using recurrent neural networks (RNNs) for VQA has been explored in the past. Xiong et al. <ref type="bibr" target="#b6">[16]</ref> build upon the dynamic memory network from Kumar and Varaiya <ref type="bibr" target="#b8">[17]</ref> and proposes DMN+. DMN+ uses episodic modules which contain attention-based Gated Recurrent Units (GRUs). Note that this is not the same as what we propose; Xiong et al. generate soft attention using convolu- tional layers and then uses it to substitute the update gate of the GRU. In contrast, our approach uses the recurrent layers to generate the attention. Noh and Han <ref type="bibr">[8]</ref> propose recur- rent answering units in which each unit is a complete mod- ule that can answer a question about an image. They use Question representation We use a fairly similar repre- sentation as <ref type="bibr" target="#b13">[7]</ref>. In short, the question is tokenized and en- coded using an embedding layer followed by a tanh acti- vation. We also exploit pretrained GloVe vectors <ref type="bibr" target="#b19">[24]</ref> and concatenate them with the output of the embedding layer. The concatenated vector is fed to a two-layer unidirectional LSTM that contains 1024 hidden states each. In contrast to Fukui et al., we use all the hidden states of both LSTMs rather than concatenating the final states to represent the fi- nal question representation.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.2.">1 × 1 Convolution and PReLU</head><p>We apply multiple 1 × 1 convolution layers in the net- work for mainly two reasons. First, they learn weights from the image and question representations in the early layers. This is important especially for the image representation, since it was originally trained for a different task. Second, they are used to generate a common representation size. To obtain a joint representation, we apply 1 × 1 convolu- tions followed by PReLU activations <ref type="bibr" target="#b0">[1]</ref> on both the image and question representations. Through empirical evidence, PReLU activations were found to reduce training time sig- nificantly and improve performance compared to ReLU and tanh activations. We provide these results in Section 4.</p><p>Next, we use the attention weights to compute a weighted average of the image and question features.</p><formula xml:id="formula_0">N att a,n = W att,n f n (4) n=1</formula><p>where f n is the input representation and att a,n is the atten- tion applied on the input. Finally, the attention maps are fed into a fully-connected layer followed by a PReLU activa- tion. <ref type="figure">Figure 3</ref> illustrates the structure of a RAU.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.3.">Recurrent Attention Units</head><formula xml:id="formula_1">y att,n = PReLU W out att a,n<label>(5)</label></formula><p>The result from the above-mentioned layers is concate- nated and fed to two separate recurrent attention units (RAU). Each RAU starts with another 1 × 1 convolution and PReLU activation:</p><p>where W out is a weight vector of the fully connected layer and y att,n is the output of each RAU.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3.4.">Reasoning layer</head><formula xml:id="formula_2">c a = PReLU W a x (1)</formula><p>where W a is the 1 × 1 convolution weights, x is the input to the RAU, and c a is the output of the first PReLU. Furthermore, we feed the previous output into an unidi- rectional LSTM:</p><p>A fusion operation is used to merge the textual and visual branches. For DRAU, we experiment with using element- wise multiplication (Hadamard product) and MCB <ref type="bibr" target="#b13">[7,</ref><ref type="bibr" target="#b20">25]</ref>. The result of the fusion is given to a many-class classifier using the top 3000 frequent answers. We use a single-layer softmax with cross-entropy loss. This can be written as:</p><formula xml:id="formula_3">h a,n = LSTM c a,n<label>(2)</label></formula><formula xml:id="formula_4">P a = softmax fusion op y text , y vis W ans (6)</formula><p>where h a,n is the hidden state at time n.</p><p>To generate the attention weights, we feed all the hidden states of the previous LSTM to a 1 × 1 convolution layer followed by a softmax function. The 1×1 convolution layer could be interpreted as the number of glimpses the model sees.</p><p>where y text and y vis are the outputs of the RAUs, W ans represents the weights of the multi-way classifier, and P a is the probability of the top 3000 frequent answers.</p><p>The final answerâanswerˆanswerâ is chosen according to the following:</p><formula xml:id="formula_5">ˆ a = argmax P a<label>(7)</label></formula><formula xml:id="formula_6">W att,n = softmax PReLU W g h a,n<label>(3)</label></formula></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.">Experiments and Results</head><p>where W g is the glimpses' weights and W att,n is the atten- tion weight vector.</p><p>Experiments are performed on the VQA 1.0 and 2.0 datasets <ref type="bibr" target="#b21">[26,</ref><ref type="bibr" target="#b22">27]</ref> </p><formula xml:id="formula_7">Acc(a) = min a is in human annotation 3 , 1<label>(8)</label></formula><p>We evaluate our results on the validation, test-dev, test- std splits of each dataset. Models evaluated on the vali- dation set use train and Visual Genome for training. For the other splits, we include the validation set in the training data. However, the models using FRCNN features do not use data augmentation with Visual Genome.</p><p>To train our model, we use Adam <ref type="bibr" target="#b24">[29]</ref> for optimization with β 1 = 0.9, β 2 = 0.999, and an initial learning rate of = 7 × 10 −4 . The final model is trained with a small batch size of 32 for 400K iterations. We did not fully ex- plore tuning the batch size which explains the relatively high number of training iterations. Dropout (p = 0.3) is applied after each LSTM and after the fusion operation. All weights are initialized as described in <ref type="bibr" target="#b25">[30]</ref> except LSTM layers which use an uniform weight distribution. The pre- trained ResNet was fixed during training due to the massive computational overhead of fine-tuning the network for the VQA task. While VQA datasets provide 10 answers per image-question pair, we sample one answer randomly for each training iteration.</p><p>model used the same question representation described in <ref type="bibr" target="#b13">[7]</ref> and passed the output to a softmax 3000-way classifica- tion layer. The goal of this architecture was to assess the extent of the language bias present in VQA.</p><p>The second baseline is a simple joint representation of the image features and the language representation. The representations were combined using the compact bilinear pooling from <ref type="bibr" target="#b20">[25]</ref>. We chose this method specifically be- cause it was shown to be effective by Fukui et al. <ref type="bibr" target="#b13">[7]</ref>. The main objective of this model is to measure how a robust pooling method of multimodal features would perform on its own without a deep architecture or attention. We refer to this model as Simple MCB.</p><p>For the last baseline, we substituted the compact bilin- ear pooling from Simple MCB with an LSTM consisting of hidden states equal to the image size. A 1 × 1 convolu- tional layer followed by a tanh activation were used on the image features prior to the LSTM, while the question repre- sentation was replicated to have a common embedding size for both representations This model is referred to as Joint LSTM.</p><p>We begin by testing our baseline models on the VQA 1.0 validation set. As shown in <ref type="table">Table 1</ref>, the language-only baseline model managed to get 48.3% overall. More im- pressively, it scored 78.56% on Yes/No questions. The Sim- ple MCB model further improves the overall performance, although little improvement is gained in the binary Yes/No tasks. Replacing MCB with our basic Joint LSTM embed- ding improves performance across the board.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.1.">VQA 1.0 Experiments</head><p>During early experiments, the VQA 2.0 dataset was not yet released. Thus, the baselines and early models were evaluated on the VQA 1.0 dataset. While building the fi- nal model, several parameters were changed, mainly, the learning rate, activation functions, dropout value, and other modifications which we discuss in this section.</p><p>Baselines We started by designing three baseline archi- tectures. The first baseline produced predictions solely from the question while totally ignoring the image. The Modifications to the Joint LSTM Model We test sev- eral variations of the Joint LSTM baseline which are high- lighted in <ref type="table">Table 2</ref>. Using PReLU activations has helped in two ways. First, it reduced time for convergence from 240K iterations to 120K. Second, the overall accuracy has improved, especially in the Other category. The next modi- fications were inspired by the results from <ref type="bibr" target="#b10">[18]</ref>. We experi- mented with appending positional features which can be de- scribed as the coordinates of each pixel to the depth/feature dimension of the image representation. When unnormalized with respect to the other features, it worsened results sig- nificantly, dropping the overall accuracy by over 2 points.  </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>VQA 1.0 Validation Split</head></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.2.">VQA 2.0 Experiments</head><p>After the release of VQA 2.0, we shifted our empirical evaluation towards the newer dataset. First, we retrain and retest our best performing VQA 1.0 model Joint LSTM as well as several improvements and modifications.</p><p>Since VQA 2.0 was built to reduce the language prior and bias inherent in VQA, the accuracy of Joint LSTM drops significantly as shown in <ref type="table" target="#tab_2">Table 3</ref>. Note that all the mod- els that were trained so far do not have explicit visual or textual attention implemented. Our first network with ex- plicit visual attention, RVAU, shows an accuracy jump by almost 3 points compared to the Joint LSTM model. This result highlights the importance of attention for good per- formance in VQA. Training the RVAU network as a multi- label task (RVAU multilabel ), i.e. using all available annotations at each training iteration, drops the accuracy horribly. This is the biggest drop in performance so far. This might be caused by the variety of annotations in VQA for each ques- tion which makes the task for optimizing all answers at once much harder.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>DRAU Evaluation</head><p>The addition of RTAU marks the cre- ation of our DRAU network. The DRAU model shows fa- vorable improvements over the RVAU model. Adding tex- tual attention improves overall accuracy by 0.56 points. Substituting the PReLU activations with ReLU (DRAU ReLU ) massively drops performance. While further training might have helped the model improve, PReLU offers much faster convergence. Increasing the value of the dropout layer after the fusion operation (DRAU high final dropout ) improves perfor- mance by 0.13 points, in contrast to the results of the Joint LSTM model on VQA 1.0. Note that on the VQA 1.0 tests, we changed the values of all layers that we apply dropout on, but here we only change the last one after the fusion operation. Totally removing this dropout layer worsens ac- curacy. This suggests that the optimal dropout value should be tuned per-layer.</p><p>We test a few variations of DRAU on the test-dev set. We can observe that VQA benefits from more training data; the same DRAU network performs better (62.24% vs. 59.58%) thanks to the additional data. Most of the literature resize the original ResNet features from 224 × 224 to 448 × 448. To test the effect of this scaling, we train a DRAU variant with the original ResNet size (DRAU small ). Reducing the image feature size from <ref type="bibr">2048 × 14 × 14 to 2048 × 7 × 7</ref> adversely affects accuracy as shown in <ref type="table" target="#tab_4">Table 4</ref>. Adding more glimpses significantly reduces the model's accuracy (DRAU glimpses = 4 ). A cause of this performance drop could be related to the fact that LSTMs process the input in a one- dimensional fashion and thus decide that each input is either relevant or non-relevant. This might explain why the at- tention maps of DRAU separate the objects from the back- ground in two glimpses as we will mention in Section 5. 2D Grid LSTMs <ref type="bibr" target="#b26">[31]</ref>   <ref type="table" target="#tab_6">Table 6</ref> shows a comparison between DRAU and other state-of-the-art models. Excluding model ensem- bles, DRAU performs favorably against other models. To the best of our knowledge, <ref type="bibr" target="#b9">[5]</ref> has the best single model performance of 65.07% on the test-std split which is very close our best model (65.03%). Small modifications or hy- perparameter tuning could push our model further. Finally, the FRCNN image features boosts the model's performance close to the state-of-the-art ensemble model. VQA 2.0 Our model DRAU MCB fusion landed the 8th place in the VQA 2.0 Test-standard task. <ref type="bibr" target="#b7">4</ref> . Currently, all reported submissions that outperform our single model use model ensembles. Using FRCNN features boosted the model's performance to outperform some of the ensemble models (66.85%). The first place submission <ref type="bibr" target="#b17">[22]</ref> reports using an ensemble of 30 models. In their report, the best single model that uses FRCNN features achieves 65.67% on the test-standard split which is outperformed by our best single model DRAU FRCNN features . <ref type="table">Table 5</ref>. Results of state-of-the-art models with RVAU.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5.">DRAU versus MCB</head><p>gested by <ref type="bibr" target="#b17">[22]</ref>. This change provides a significant perfor- mance increase of 3.04 points (DRAU FRCNN features ).</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.3.">Transplanting RVAU in other models</head><p>To verify the effectiveness of the recurrent attention units, we replace the attention layers in MCB and MUTAN <ref type="bibr" target="#b3">[14]</ref> with RVAU.</p><p>For MCB <ref type="bibr" target="#b13">[7]</ref> we remove all the layers after the first MCB operation until the first 2048-d output and replace them with RVAU. Due to GPU memory constraints, we reduced the size of each hidden unit in RVAU's LSTM from 2048 to 1024. In the same setting, RVAU significantly helps im- prove the original MCB model's accuracy as shown in Ta- ble 5. The most noticeable performance boost can be seen in the number category, which supports our hypothesis that recurrent layers are more suited for sequential reasoning.</p><p>Furthermore, we test RVAU in the MUTAN model <ref type="bibr" target="#b3">[14]</ref>. The authors use a multimodal vector with dimension size of 510 for the joint representations. For coherence, we change the usual dimension size in RVAU to 510. At the time of this writing, the authors have not released results on VQA 2.0 using a single model rather than a model ensemble. There- fore, we train a single-model MUTAN using the authors' implementation. <ref type="bibr" target="#b2">2</ref> The story does not change here, RVAU improves the model's overall accuracy.</p><p>In this section, we provide qualitative results that high- light the effect of the recurrent layers compared to the MCB model.</p><p>The strength of RAUs is notable in tasks that require se- quentially processing the image or relational/multi-step rea- soning. In the same setting, DRAU outperforms MCB in counting questions. This is validated in a subset of the val- idation split questions in the VQA 2.0 dataset as shown in <ref type="figure" target="#fig_2">Figure 4</ref>. <ref type="figure" target="#fig_3">Figure 5</ref> shows some qualitative results between DRAU and MCB. For fair comparison we compare the first attention map of MCB with the second attention map of our model. We do so because the authors of MCB <ref type="bibr" target="#b13">[7]</ref> visualize the first map in their work <ref type="bibr" target="#b9">5</ref> . Furthermore, the first glimpse of our model seems to be the complement of the second attention, i.e. the model separates the background and the target object(s) into separate attention maps. We have not tested the visual effect of more than two glimpses on our model. In <ref type="figure" target="#fig_3">Figure 5</ref>, it is clear that the recurrence helps the model attend to multiple targets as apparent in the difference of the attention maps between the two models. DRAU seems to also know how to count the right object(s). The top right ex- ample in <ref type="figure" target="#fig_3">Figure 5</ref> illustrates that DRAU is not easily fooled by counting whatever object is present in the image but rather the object that is needed to answer the question. This    property also translates to questions that require relational reasoning. The second column in <ref type="figure" target="#fig_3">Figure 5</ref> demonstrates how DRAU can attend the location required to answer the question based on the textual and visual attention maps.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="6.">Conclusion</head><p>We proposed an architecture for VQA with a novel at- tention unit, termed the Recurrent Attention Unit (RAU). The recurrent layers help guide the textual and visual atten- tion since the network can reason relations between several parts of the image and question. We provided quantitative and qualitative results indicating the usefulness of a recur- rent attention mechanism. Our DRAU model showed im- proved performance in tasks requiring sequential/complex reasoning such as counting or relational reasoning over <ref type="bibr" target="#b13">[7]</ref>, the winners of the VQA 2016 challenge. In VQA 1.0, we achieved near state-of-the-art results for single model per- formance with our DRAU network (65.03 vs. 65.07 <ref type="bibr" target="#b9">[5]</ref>  of the state-of-the-art 5-model ensemble MUTAN <ref type="bibr" target="#b3">[14]</ref>. Fi- nally, we demonstrated that substituting the visual attention mechanism in other networks, MCB <ref type="bibr" target="#b13">[7]</ref> and MUTAN <ref type="bibr" target="#b3">[14]</ref>, consistently improves their performance. In future work we will investigate implicit recurrent attention mechanism us- ing recently proposed explanation methods <ref type="bibr" target="#b32">[37,</ref><ref type="bibr" target="#b33">38]</ref>. </p></div><figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_0"><head>Figure 2 .</head><label>2</label><figDesc>Figure 2. The proposed network. ⊕ denotes concatenation.</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_1"><head>VQA</head><label></label><figDesc></figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_2"><head>Figure 4 .</head><label>4</label><figDesc>Figure 4. Results on questions that require counting in the VQA 2.0 validation set.</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_3"><head>Figure 5 .</head><label>5</label><figDesc>Figure 5. DRAU vs. MCB Qualitative examples. Attention maps for both models shown, only DRAU has textual attention.</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_0" validated="false"><head>.</head><label></label><figDesc></figDesc><table>These datasets use images from the 
+
+VQA 1.0 Validation Split 
+Open Ended Task 
+Baselines 
+Y/N Num. Other 
+All 
+
+Language only 78.56 27.98 30.76 48.3 
+Simple MCB 
+78.64 32.98 39.79 54.82 
+Joint LSTM 
+79.90 36.96 49.58 59.34 
+
+Figure 3. Recurrent Attention Unit. 
+
+Table 1. Evaluation of the baseline models on the VQA 1.0 vali-
+dation split. 
+
+MS-COCO dataset [28] and generate questions and labels 
+(10 labels per question) using Amazon's Mechanical Turk 
+(AMT). Compared to VQA 1.0, VQA 2.0 adds more image-
+question pairs to balance the language prior present in the 
+VQA 1.0 dataset. The ground truth answers in the VQA 
+dataset are evaluated using human consensus. 
+
+</table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_2" validated="false"><head>Table 3 .</head><label>3</label><figDesc></figDesc><table>Evaluation of RVAU and DRAU-based models on the 
+VQA 2.0 validation split. 
+
+</table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_3" validated="false"><head></head><label></label><figDesc>might help remove this limitation. Removing the extra data from Visual Genome hurts the model's accuracy. That supports the fact that VQA is very diverse and that extra data helps the model perform better. Finally, substituting Hadamard product of MCB in the final fusion operation boosts the network's accuracy</figDesc><table>significantly 
+by 1.17 points (DRAU MCB fusion ). 
+As mentioned in Section 3.1, we experiment replacing 
+the global ResNet features with object-level features as sug-
+
+1 Concurrent Work 
+
+VQA 2.0 Test-Dev Split 
+Open Ended Task 
+Model 
+Y/N 
+Num. Other 
+All 
+
+4.4. DRAU versus the state-of-the-art 
+
+DRAU Hadamard fusion 78.27 40.31 53.57 62.24 
+DRAU small 
+77.53 38.78 49.93 60.03 
+DRAU glimpses = 4 
+76.82 39.15 51.07 60.32 
+DRAU no genome 
+79.63 39.55 51.81 61.88 
+DRAU MCB fusion 
+78.97 40.06 55.47 63.41 
+DRAU FRCNN features 82.85 44.78 
+57.4 66.45 
+
+VQA 1.0 </table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_4" validated="false"><head>Table 4 .</head><label>4</label><figDesc></figDesc><table>Evaluation of later DRAU-based models on the VQA 2.0 
+test-dev split. 
+
+VQA 2.0 Test-dev Split 
+Open Ended Task 
+Model 
+Y/N Num. Other 
+All 
+
+MCB [7] 
+
+3 
+
+78.41 38.81 53.23 61.96 
+MCB w/RVAU 
+77.31 40.12 54.64 62.33 
+
+MUTAN [14] 
+79.06 38.95 53.46 62.36 
+MUTAN w/RVAU 79.33 39.48 53.28 62.45 
+
+</table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_6" validated="false"><head>Table 6 .</head><label>6</label><figDesc></figDesc><table>DRAU compared to the state-of-the-art on the VQA 1.0 dataset.e = n corresponds to a model ensemble of size n. 
+
+VQA 2.0 Open Ended Task 
+Test-dev 
+Test-standard 
+Model 
+Y/N Num. Other 
+All 
+Y/N Num. Other 
+All 
+
+UPC 
+67.1 31.54 25.46 43.3 66.97 31.38 25.81 43.48 
+MIC TJ 
+69.02 34.52 35.76 49.32 69.22 34.16 35.97 49.56 
+neural-vqa-attention[10] 
+70.1 35.39 47.32 55.35 69.77 35.65 47.18 55.28 
+CRCV REU 
+73.91 36.82 54.85 60.65 74.08 36.43 54.84 60.81 
+VQATeam MCB [26] 
+78.41 38.81 53.23 61.96 78.82 38.28 53.36 62.27 
+DCD ZJU[32] 
+79.84 38.72 53.08 62.47 79.85 38.64 52.95 62.54 
+VQAMachine [33] 
+79.4 40.95 53.24 62.62 79.82 40.91 53.35 62.97 
+POSTECH 
+78.98 40.9 55.35 63.45 79.32 40.67 55.3 63.66 
+UPMC-LIP6[14] 
+81.96 41.62 57.07 65.57 82.07 41.06 57.12 65.71 
+LV NUS[34] 
+81.95 48.31 59.99 67.71 81.92 48.38 59.63 67.64 
+DLAIT 
+82.94 47.08 59.94 67.95 83.17 46.66 60.15 68.22 
+HDU-USYD-UNCC[35] 
+84.39 45.76 59.14 68.02 84.5 45.39 59.01 68.09 
+Adelaide-Teney ACRV MSR[36] 85.24 48.19 59.88 69.00 85.54 47.45 59.82 69.13 
+
+DRAU Hadamard fusion 
+78.27 40.31 53.58 62.24 78.86 39.91 53.76 62.66 
+DRAU MCB fusion 
+78.97 40.06 55.48 63.41 79.27 40.15 55.55 63.71 
+DRAU FRCNN features 
+82.85 44.78 57.4 66.45 83.35 44.37 57.63 66.85 
+
+</table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_7" validated="false"><head>Table 7 .</head><label>7</label><figDesc></figDesc><table>DRAU compared to the current submissions on the VQA 2.0 dataset. 
+
+</table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_8" validated="false"><head></head><label></label><figDesc>). Adding the FRCNN features gets the model within margin</figDesc><table>Question Type (Occurrence) 
+
+47.28 
+46.31 
+44.30 
+
+DRAU 
+MCB 
+
+Visual Question Answering and Visual Grounding," in Em-
+pirical Methods in Natural Language Processing (EMNLP), 
+2016, pp. 457-468. 
+
+42.06 
+
+43.98 
+42.57 
+Accuracy(%) 
+
+[8] H. Noh and B. Han, "Training Recurrent Answering Units 
+with Joint Loss Minimization for VQA," arXiv:1606.03647, 
+2016. 
+
+[9] J. Lu, J. Yang, D. Batra, and D. Parikh, "Hierarchical 
+Question-Image Co-Attention for Visual Question Answer-
+ing," in Advances in Neural Information Processing Systems 
+(NIPS), 2016, pp. 289-297. 
+
+how many 
+people are in 
+(905) 
+
+how many 
+people are 
+(2,005) 
+
+how many 
+(20,462) 
+
+</table></figure>
+
+			<note place="foot" n="2"> https://github.com/Cadene/vqa.pytorch 3 http://www.visualqa.org/roe_2017.html 4 https://evalai.cloudcv.org/web/challenges/ challenge-page/1/leaderboard 5 https://github.com/akirafukui/vqa-mcb/blob/ master/server/server.py#L185</note>
+		</body>
+		<back>
+
+			<div type="acknowledgement">
+			</div>
+
+			<div type="references">
+
+				<listBibl>
+
+<biblStruct xml:id="b0">
+	<analytic>
+		<title level="a" type="main">Delving Deep into Rectifiers: Surpassing Human-Level Performance on ImageNet Classification</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">K</forename><surname>He</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">X</forename><surname>Zhang</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>Ren</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Sun</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">IEEE International Conference on Computer Vision (ICCV)</title>
+		<imprint>
+			<date type="published" when="2015" />
+			<biblScope unit="page" from="1026" to="1034" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b1">
+	<analytic>
+		<title level="a" type="main">Finding frequent items in data streams</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Charikar</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">K</forename><surname>Chen</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Farach-Colton</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Theoretical Computer Science</title>
+		<imprint>
+			<biblScope unit="volume">312</biblScope>
+			<biblScope unit="issue">1</biblScope>
+			<biblScope unit="page" from="3" to="15" />
+			<date type="published" when="2004" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b2">
+	<analytic>
+		<title level="a" type="main">Deep neural networks for no-reference and fullreference image quality assessment</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>Bosse</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Maniry</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">K.-R</forename><surname>Müller</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">T</forename><surname>Wiegand</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">W</forename><surname>Samek</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">IEEE Transactions on Image Processing</title>
+		<imprint>
+			<biblScope unit="volume">27</biblScope>
+			<biblScope unit="issue">1</biblScope>
+			<biblScope unit="page" from="206" to="219" />
+			<date type="published" when="2018" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b3">
+	<monogr>
+		<title level="m" type="main">MUTAN: Multimodal Tucker Fusion for Visual Question Answering</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">H</forename><surname>Ben-Younes</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">R</forename><surname>Cadene</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Cord</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">N</forename><surname>Thome</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:1705.06676</idno>
+		<imprint>
+			<date type="published" when="2017" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b4">
+	<analytic>
+		<title level="a" type="main">Some mathematical notes on three-mode factor analysis</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">L</forename><forename type="middle">R</forename><surname>Tucker</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Psychometrika</title>
+		<imprint>
+			<biblScope unit="volume">31</biblScope>
+			<biblScope unit="issue">3</biblScope>
+			<biblScope unit="page" from="279" to="311" />
+			<date type="published" when="1966" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b5">
+	<analytic>
+		<title level="a" type="main">Neural Machine Translation by Jointly Learning to Align and Translate</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Bahdanau</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">K</forename><surname>Cho</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Y</forename><surname>Bengio</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">International Conference on Representation Learning (ICLR)</title>
+		<imprint>
+			<date type="published" when="2015" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b6">
+	<analytic>
+		<title level="a" type="main">Dynamic Memory Networks for Visual and Textual Question Answering</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">C</forename><surname>Xiong</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>Merity</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">R</forename><surname>Socher</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">International Conference on Machine Learning (ICML)</title>
+		<imprint>
+			<date type="published" when="2016" />
+			<biblScope unit="page" from="2397" to="2406" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b7">
+	<monogr>
+		<title level="m" type="main">Abstractive text summarization using sequence-to-sequence rnns and beyond</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">R</forename><surname>Nallapati</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">B</forename><surname>Zhou</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">C</forename><surname>Gulcehre</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">B</forename><surname>Xiang</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:1602.06023</idno>
+		<imprint>
+			<date type="published" when="2016" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b8">
+	<monogr>
+		<title level="m" type="main">Stochastic systems: Estimation, identification, and adaptive control</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">P</forename><forename type="middle">R</forename><surname>Kumar</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">P</forename><surname>Varaiya</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2015" />
+			<publisher>SIAM</publisher>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b9">
+	<analytic>
+		<title level="a" type="main">Hadamard Product for Low-rank Bilinear Pooling</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J.-H</forename><surname>Kim</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">K.-W</forename><surname>On</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Kim</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J.-W</forename><surname>Ha</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">B.-T</forename><surname>Zhang</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">International Conference on Representation Learning (ICLR)</title>
+		<imprint>
+			<date type="published" when="2017" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b10">
+	<monogr>
+		<title level="m" type="main">Show, Ask, Attend, and Answer: A Strong Baseline For Visual Question Answering</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">V</forename><surname>Kazemi</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><surname>Elqursh</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:1704.03162</idno>
+		<imprint>
+			<date type="published" when="2017" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b11">
+	<analytic>
+		<title level="a" type="main">Dual Attention Networks for Multimodal Reasoning and Matching</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">H</forename><surname>Nam</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J.-W</forename><surname>Ha</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Kim</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">IEEE International Conference on Computer Vision (CVPR</title>
+		<imprint>
+			<date type="published" when="2017" />
+			<biblScope unit="page" from="299" to="307" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b12">
+	<analytic>
+		<title level="a" type="main">Ask Me Anything: Free-form Visual Question Answering Based on Knowledge from External Sources</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Q</forename><surname>Wu</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">P</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">C</forename><surname>Shen</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><surname>Dick</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">IEEE Conference on Computer Vision and Pattern Recognition (CVPR)</title>
+		<imprint>
+			<date type="published" when="2016" />
+			<biblScope unit="page" from="4622" to="4630" />
+		</imprint>
+	</monogr>
+	<note>den Hengel</note>
+</biblStruct>
+
+<biblStruct xml:id="b13">
+	<analytic>
+		<title level="a" type="main">Question Relevance in VQA: Identifying Non-Visual And False-Premise Questions</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><surname>Fukui</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><forename type="middle">H</forename><surname>Park</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Yang</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><surname>Rohrbach</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">T</forename><surname>Darrell</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Rohrbach</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">;</forename><forename type="middle">A</forename><surname>Ray</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">G</forename><surname>Christie</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Bansal</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Batra</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Parikh</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Empirical Methods in Natural Language Processing</title>
+		<imprint>
+			<date type="published" when="2016" />
+			<biblScope unit="page" from="919" to="924" />
+		</imprint>
+	</monogr>
+	<note>Multimodal Compact Bilinear Pooling for</note>
+</biblStruct>
+
+<biblStruct xml:id="b14">
+	<monogr>
+		<title/>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J.-H</forename><surname>Kim</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S.-W</forename><surname>Lee</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Kwak</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M.-O</forename><surname>Heo</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Kim</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J.-W</forename></persName>
+		</author>
+		<imprint/>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b15">
+	<analytic>
+		<title level="a" type="main">Multimodal Residual Learning for Visual QA</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">B.-T</forename><surname>Ha</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><surname>Zhang</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Advances in Neural Information Processing Systems</title>
+		<imprint>
+			<date type="published" when="2016" />
+			<biblScope unit="volume">29</biblScope>
+			<biblScope unit="page" from="361" to="369" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b16">
+	<monogr>
+		<title level="m" type="main">tention for Image Captioning and VQA</title>
+		<idno type="arXiv">arXiv:1707.07998</idno>
+		<imprint>
+			<date type="published" when="2017" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b17">
+	<analytic>
+		<title/>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">P</forename><surname>Anderson</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">X</forename><surname>He</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">C</forename><surname>Buehler</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Teney</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Johnson</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>Gould</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">L</forename><surname>Zhang</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Bottom-Up and Top-Down At</title>
+		<imprint/>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b18">
+	<monogr>
+		<title level="m" type="main">Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>Ren</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">K</forename><surname>He</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">R</forename><surname>Girshick</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Sun</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:1506.01497</idno>
+		<imprint>
+			<date type="published" when="2015-06" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b19">
+	<analytic>
+		<title level="a" type="main">GloVe: Global Vectors for Word Representation</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Pennington</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">R</forename><surname>Socher</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">C</forename><forename type="middle">D</forename><surname>Manning</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Empirical Methods in Natural Language Processing</title>
+		<imprint>
+			<date type="published" when="2014" />
+			<biblScope unit="page" from="1532" to="1543" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b20">
+	<analytic>
+		<title level="a" type="main">Compact bilinear pooling</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Y</forename><surname>Gao</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">O</forename><surname>Beijbom</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">N</forename><surname>Zhang</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">T</forename><surname>Darrell</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">IEEE Conference on Computer Vision and Pattern Recognition (CVPR)</title>
+		<imprint>
+			<date type="published" when="2016" />
+			<biblScope unit="page" from="317" to="326" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b21">
+	<analytic>
+		<title level="a" type="main">Making the V in VQA Matter: Elevating the Role of Image Understanding in Visual Question Answering</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Y</forename><surname>Goyal</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">T</forename><surname>Khot</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Summers-Stay</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Batra</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Parikh</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">IEEE Conference on Computer Vision and Pattern Recognition</title>
+		<imprint>
+			<date type="published" when="2017" />
+			<biblScope unit="page" from="6904" to="6913" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b22">
+	<analytic>
+		<title level="a" type="main">VQA: Visual Question Answering</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>Antol</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><surname>Agrawal</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Lu</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Mitchell</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">C</forename><forename type="middle">L</forename><surname>Zitnick</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Batra</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Parikh</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">IEEE International Conference on Computer Vision (CVPR)</title>
+		<imprint>
+			<date type="published" when="2015" />
+			<biblScope unit="page" from="2425" to="2433" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b23">
+	<analytic>
+		<title level="a" type="main">Microsoft coco: Common objects in context</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">T.-Y</forename><surname>Lin</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Maire</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>Belongie</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Hays</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">P</forename><surname>Perona</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Ramanan</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">P</forename><surname>Dollár</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">C</forename><forename type="middle">L</forename><surname>Zitnick</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">European Conference on Computer Vision-ECCV</title>
+		<imprint>
+			<date type="published" when="2014" />
+			<biblScope unit="page" from="740" to="755" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b24">
+	<monogr>
+		<title level="m" type="main">Adam: A Method for Stochastic Optimization</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><forename type="middle">P</forename><surname>Kingma</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Ba</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:1412.6980</idno>
+		<imprint>
+			<date type="published" when="2014" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b25">
+	<monogr>
+		<title level="m" type="main">Understanding the difficulty of training deep feedforward neural networks</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">X</forename><surname>Glorot</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Y</forename><surname>Bengio</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2010" />
+			<publisher>AISTATS</publisher>
+			<biblScope unit="page" from="249" to="256" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b26">
+	<monogr>
+		<title level="m" type="main">Grid long short-term memory</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">N</forename><surname>Kalchbrenner</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">I</forename><surname>Danihelka</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><surname>Graves</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:1507.01526</idno>
+		<imprint>
+			<date type="published" when="2015" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b27">
+	<monogr>
+		<title level="m" type="main">Task-driven Visual Saliency and Attention-based Visual Question Answering</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Y</forename><surname>Lin</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Z</forename><surname>Pang</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Y</forename><surname>Zhuang</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:1702.06700</idno>
+		<imprint>
+			<date type="published" when="2017" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b28">
+	<monogr>
+		<title level="m" type="main">The VQA-Machine: Learning How to Use Existing Vision Algorithms to Answer New Questions</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">P</forename><surname>Wang</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Q</forename><surname>Wu</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">C</forename><surname>Shen</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><surname>Van Den Hengel</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:1612.05386</idno>
+		<imprint>
+			<date type="published" when="2016" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b29">
+	<monogr>
+		<title level="m" type="main">A Simple Loss Function for Improving the Convergence and Accuracy of Visual Question Answering Models</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">I</forename><surname>Ilievski</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Feng</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:1708.00584</idno>
+		<imprint>
+			<date type="published" when="2017" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b30">
+	<monogr>
+		<title level="m" type="main">Beyond Bilinear: Generalized Multi-modal Factorized High-order Pooling for Visual Question Answering</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Z</forename><surname>Yu</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Yu</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">C</forename><surname>Xiang</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Fan</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Tao</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:1708.03619</idno>
+		<imprint>
+			<date type="published" when="2017" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b31">
+	<monogr>
+				<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Teney</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">P</forename><surname>Anderson</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">X</forename><surname>He</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><surname>Van Den Hengel</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:1708.02711</idno>
+		<title level="m">Tips and Tricks for Visual Question Answering: Learnings from the 2017 Challenge</title>
+		<imprint>
+			<date type="published" when="2017" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b32">
+	<analytic>
+		<title level="a" type="main">Methods for interpreting and understanding deep neural networks</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">G</forename><surname>Montavon</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">W</forename><surname>Samek</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">K.-R</forename><surname>Müller</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Digital Signal Processing</title>
+		<imprint>
+			<biblScope unit="volume">73</biblScope>
+			<biblScope unit="page" from="1" to="15" />
+			<date type="published" when="2018" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b33">
+	<analytic>
+		<title level="a" type="main">Explaining recurrent neural network predictions in sentiment analysis</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">L</forename><surname>Arras</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">G</forename><surname>Montavon</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">K.-R</forename><surname>Müller</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">W</forename><surname>Samek</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">EMNLP&apos;17 Workshop on Computational Approaches to Subjectivity, Sentiment &amp; Social Media Analysis (WASSA</title>
+		<imprint>
+			<date type="published" when="2017" />
+			<biblScope unit="page" from="159" to="168" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+				</listBibl>
+			</div>
+		</back>
+	</text>
+</TEI>
