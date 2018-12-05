@@ -23,3 +23,10 @@ Tested on 1634 examples:
 To Reproduce the results, setup [fastText](https://fasttext.cc/docs/en/support.html) and run:
 
 `./fasttext test model_da5.bin ../arxiv.pre.valid`
+
+## Word2Vec Representation
+![alt text](https://github.com/namanahuja/Research-Paper-Tagger/blob/master/media/w2v.png)
+## Doc2Vec Representation
+![alt text](https://github.com/namanahuja/Research-Paper-Tagger/blob/master/media/doc2vec.png)
+## Evaluation Results
+![alt text](https://github.com/namanahuja/Research-Paper-Tagger/blob/master/media/results.jpg)
