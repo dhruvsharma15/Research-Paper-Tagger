@@ -1,1 +1,4 @@
 scikit-multilearn
+tensorflow
+glove-python
+nltk
