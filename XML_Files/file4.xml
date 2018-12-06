@@ -1,0 +1,685 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://www.tei-c.org/ns/1.0 C:\grobid-0.5.1\grobid-0.5.1\grobid-home/schemas/xsd/Grobid.xsd"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+	<teiHeader xml:lang="en">
+		<encodingDesc>
+			<appInfo>
+				<application version="0.5.1-SNAPSHOT" ident="GROBID" when="2018-11-08T07:21+0000">
+					<ref target="https://github.com/kermitt2/grobid">GROBID - A machine learning software for extracting information from scholarly documents</ref>
+				</application>
+			</appInfo>
+		</encodingDesc>
+		<fileDesc>
+			<titleStmt>
+				<title level="a" type="main">Learning what to share between loosely related tasks</title>
+			</titleStmt>
+			<publicationStmt>
+				<publisher/>
+				<availability status="unknown"><licence/></availability>
+			</publicationStmt>
+			<sourceDesc>
+				<biblStruct>
+					<analytic>
+						<author role="corresp">
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Sebastian</forename><surname>Ruder</surname></persName>
+							<email>sebastian@ruder.io, {bingel|soegaard}@di.ku.dk, augenstein@di.ku.dk</email>
+						</author>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Joachim</forename><surname>Bingel</surname></persName>
+							<affiliation key="aff2">
+								<orgName type="department">Department of Computer Science</orgName>
+								<orgName type="institution">University of Copenhagen</orgName>
+								<address>
+									<country key="DK">Denmark</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Isabelle</forename><surname>Augenstein</surname></persName>
+							<affiliation key="aff3">
+								<orgName type="department">Department of Computer Science</orgName>
+								<orgName type="institution">UCL</orgName>
+								<address>
+									<country key="GB">UK</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Anders</forename><surname>Søgaard</surname></persName>
+							<affiliation key="aff2">
+								<orgName type="department">Department of Computer Science</orgName>
+								<orgName type="institution">University of Copenhagen</orgName>
+								<address>
+									<country key="DK">Denmark</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<affiliation key="aff0">
+								<orgName type="department">Insight Research Centre</orgName>
+								<orgName type="institution">National University of Ireland</orgName>
+								<address>
+									<settlement>Galway</settlement>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<affiliation key="aff1">
+								<orgName type="institution">Aylien Ltd</orgName>
+								<address>
+									<settlement>Dublin</settlement>
+									<country key="IE">Ireland</country>
+								</address>
+							</affiliation>
+						</author>
+						<title level="a" type="main">Learning what to share between loosely related tasks</title>
+					</analytic>
+					<monogr>
+						<imprint>
+							<date/>
+						</imprint>
+					</monogr>
+				</biblStruct>
+			</sourceDesc>
+		</fileDesc>
+		<profileDesc>
+			<abstract>
+				<p>Multi-task learning is motivated by the observation that humans bring to bear what they know about related problems when solving new ones. Similarly, deep neural networks can profit from related tasks by sharing parameters with other networks. However, humans do not consciously decide to transfer knowledge between tasks. In Natural Language Processing (NLP), it is hard to predict if sharing will lead to improvements, particularly if tasks are only loosely related. To overcome this, we introduce SLUICE NETWORKS, a general framework for multi-task learning where trainable parameters control the amount of sharing. Our framework generalizes previous proposals in enabling sharing of all combinations of subspaces, layers, and skip connections. We perform experiments on three task pairs, and across seven different domains, using data from OntoNotes 5.0, and achieve up to 15% average error reductions over common approaches to multi-task learning. We show that a) label entropy is predictive of gains in sluice networks, confirming findings for hard parameter sharing and b) while sluice networks easily fit noise, they are robust across domains in practice.</p>
+			</abstract>
+		</profileDesc>
+	</teiHeader>
+	<text xml:lang="en">
+		<body>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="1">Introduction</head><p>Existing theory mainly provides guarantees for multi- task learning (MTL) of homogeneous tasks, such as pure regression or classification tasks <ref type="bibr" target="#b1">(Baxter, 2000;</ref><ref type="bibr" target="#b2">Ben-David and Schuller, 2003)</ref>. These guar- antees, however, do not hold for the heterogeneous Work done during a visit at the University of Copenhagen.</p><p>Our limited understanding of multi-task learning is also a practical problem: With hundreds of potential sharing structures, an exhaustive exploration of the search space of multi-task learning for specific prob- lems is infeasible. Existing work ( <ref type="bibr" target="#b17">Kumar and Daumé III, 2012;</ref><ref type="bibr">Maurer et al., 2013</ref>) uses sparsity to share task predictors, but has only been applied to homoge- neous tasks. Previous work in multi-task learning of heterogeneous tasks only considers at most a couple of architectures for sharing <ref type="bibr">(Søgaard and Goldberg, 2016;</ref><ref type="bibr">Peng and Dredze, 2016;</ref><ref type="bibr">Martínez Alonso and Plank, 2017)</ref>. In contrast, we present a framework that unifies such different approaches by introducing trainable parameters for the components that differ- entiate multi-task learning approaches. We build on recent work trying to learn where to split merged networks ( <ref type="bibr">Misra et al., 2016)</ref>, as well as work try- ing to learn how best to combine private and shared subspaces ( <ref type="bibr" target="#b4">Bousmalis et al., 2016;</ref><ref type="bibr" target="#b13">Liu et al., 2017</ref>). <ref type="figure">Figure 1</ref>: A SLUICE NETWORK with one main task A and one auxiliary task B. It consists of a shared input layer (shown left), two task-specific output lay- ers (right), and three hidden layers per task, each partitioned into two subspaces. α parameters control which subspaces are shared between main and aux- iliary task, while β parameters control which layer outputs are used for prediction.</p><p>Contributions Our architecture (shown in <ref type="figure">Figure  1</ref>) is empirically justified and deals with the dirtiness ( <ref type="bibr" target="#b15">Jalali et al., 2010</ref>) of loosely related tasks. It goes significantly beyond previous work, learning both what layers to share, and which parts of those layers to share, as well as using skip connections to learn a mixture model at the architecture's outer layer. We show that it is a generalization of various multi-task learning algorithms such as hard parameter sharing <ref type="bibr" target="#b5">(Caruana, 1998)</ref>, low supervision <ref type="bibr">(Søgaard and Goldberg, 2016)</ref>, and cross-stitch networks ( <ref type="bibr">Misra et al., 2016)</ref>, as well as transfer learning algorithms such as frustratingly easy domain adaptation <ref type="bibr" target="#b7">(Daumé III, 2007</ref>). Moreover, we study what task properties pre- dict gains, and what properties correlate with learning certain types of sharing, as well as the inductive bias of the resulting architecture.</p><p>layer associating the elements of an input sequence, in our case English words, with vector representa- tions via word and character embeddings. The two sequences of vectors are then passed on to their re- spective inner recurrent layers. Each layer is divided into subspaces, e.g., for A into G A,1,1 and G A,1,2 , which allow the network to learn task-specific and shared representations, if beneficial. The output of the inner layer of network A is then passed to its sec- ond layer, as well as to the second layer of network B. This traffic of information is mediated by a set of parameters α in a way such that the second layer of each network receives a weighted combination of the output of the two inner layers. The subspaces have different weights. Importantly, these weights are trainable and allow the model to learn whether to share, whether to restrict sharing to a shared sub- space, etc. Finally, a weighted combination of the outputs of the outer recurrent layers G ·,3,· as well as the weighted outputs of the inner layers are mediated through β parameters, which reflect a mixture over the representations at various depths of the network. In sum, sluice networks have the capacity to learn what layers and subspaces should be shared, as well as at what layers the network has learned the best representations of the input sequences.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2">An Architecture for Learning to Share</head><p>We introduce a novel architecture for multi-task learn- ing, which we refer to as a SLUICE NETWORK, sketched in <ref type="figure">Figure 1</ref> for the case of two tasks. The network learns to share parameters between deep recurrent neural networks (RNNs) <ref type="bibr" target="#b11">(Hochreiter and Schmidhuber, 1997</ref>). The recurrent networks could easily be replaced with multi-layered perceptrons or convolutional neural networks for other applications.</p><p>The two networks A and B share an embedding</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>Matrix Regularization</head><p>We cast learning what to share as a matrix regularization problem, following <ref type="bibr" target="#b14">(Jacob et al., 2009;</ref><ref type="bibr">Yang and Hospedales, 2017</ref>). As- sume M different tasks that are loosely related, with M potentially non-overlapping datasets D 1 , . . . , D M . Each task is associated with a deep neural network with K layers L 1 , . . . L K . We assume that all the deep networks have the same hyper-parameters at the outset. With loosely related tasks, one task may be better modeled with one hidden layer; another one with two <ref type="bibr">(Søgaard and Goldberg, 2016)</ref>; some may share many parameters, while others mostly rely on task-specific representations. Our architecture is flex- ible enough to learn this by allocating appropriate subspaces and mediating weights starting from the union of the a priori task networks.</p><p>Let W ∈ R M ×D be a matrix in which each row i corresponds to a model θ i with D parameters. The loss that sluice networks minimize, with a penalty term Ω, is then as follows:</p><formula xml:id="formula_0">λ 1 L 1 (f (x; θ 1 ), y 1 ) + . . . + λ M L M (f (x; θ M ), y M ) + Ω (1)</formula><p>The loss functions L i are cross-entropy functions of the form − y p(y) log q(y) where y i are the la- bels of task i. Note that sluice networks are not restricted to tasks with the same loss functions, but could also be applied to jointly learn regression and classification tasks. The weights λ i determine the importance of the different tasks during training. In all our experiments, we use the same weight for all tasks.</p><p>We explicitly add inductive bias to the model via the regularizer Ω, which we describe in Equation 4. However, our model also implicitly learns regular- ization through multi-task learning <ref type="bibr">(Caruana, 1993)</ref> mediated by the α weights, while the β weights are used to learn the parameters of the mixture functions f (·), as detailed in the following.</p><p>designates the stacking of two vectors a, b ∈ R D to a matrix M ∈ R 2×D .</p><p>Extending the α-layers to include subspaces, for 2 tasks and 2 subspaces, we obtain an α matrix ∈ R 4×4 that not only controls the interaction between the layers of both tasks, but also between their subspaces:</p><formula xml:id="formula_1">      h A 1 ,k . . .   =   α A 1 A 1 . . . α B 2 A 1 . . . . . . . . .   h A 1 ,k , . . . , h B 2 ,k h B 2 ,k α A 1 B 2 . . . α B 2 B 2</formula><p>(3) where h A 1 ,k is the output of the first subspace of the k-th layer of task A and h A 1 ,k is the linear com- bination for the first subspace of task A. The input to the k + 1-th layer of task A is then the concatenation of both subspace outputs: Recall that our architecture is partly motivated by the observation that for loosely related tasks, only certain features in specific layers should be shared, while many of the layers and subspaces may remain more task-specific <ref type="bibr">(Søgaard and Goldberg, 2016)</ref>. We want to learn what to share while inducing models for the different tasks. For simplicity, we ignore subspaces at first and assume only two tasks A and B. The outputs h A,k,t and h B,k,t of the k-th layer for time step t for task A and B respectively interact through what <ref type="bibr">Misra et al. (2016)</ref> refer to as cross- stitch units α (see <ref type="figure">Figure 1</ref>). Omitting t for simplicity, the output of the α layers is:</p><formula xml:id="formula_2">h A,k = h A 1 ,k , h A 2 ,k</formula><p>. Different α weights correspond to different matrix regularizers Ω, including several ones that have been proposed previously for multi-task learning. We re- view those in Section 3. For now just observe that if all α-values are set to 0.25 (or any other constant), we obtain hard parameter sharing <ref type="bibr">(Caruana, 1993)</ref>, which is equivalent to a heavy L 0 -regularizer.</p><p>Adding Inductive Bias Naturally, we can also add inductive bias to sluice networks by partially con- straining the regularizer or adding to the learned penalty. Inspired by work on shared-space com- ponent analysis ( <ref type="bibr">Salzmann et al., 2010)</ref>, we add a penalty to enforce a division of labor and discourage redundancy between shared and task-specific sub- spaces. While the networks can theoretically learn such a separation, an explicit constraint empirically leads to better results and enables the sluice net- works to take better advantage of subspace-specific α-values. This is modeled by an orthogonality con- straint ( <ref type="bibr" target="#b4">Bousmalis et al., 2016</ref>) between the layer- wise subspaces of each model:</p><formula xml:id="formula_3">M K Ω = m,k,1 G m,k,2 2 F (4) h A,k h B,k = α AA α AB α BA α BB h A,k , h B,k m=1 k=1 (2)</formula><p>where h A,k is a linear combination of the outputs that is fed to the k+1-th layer of task A, and a , b</p><p>where M is the number of tasks, K is the number of layers, · 2 F is the squared Frobenius norm, and G m,k,1 and G k,2,m are the first and second subspace respectively in the k-th layer of m-th task model.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>Learning Mixtures</head><p>Many tasks have an implicit hierarchy that informs their interaction. Rather than predefining it <ref type="bibr">(Søgaard and Goldberg, 2016;</ref><ref type="bibr" target="#b9">Hashimoto et al., 2017)</ref>, we enable our model to learn hierarchical relations by associating different tasks with different layers if this is beneficial for learning. Inspired by advances in residual learning ( <ref type="bibr" target="#b10">He et al., 2016)</ref>, we employ skip-connections from each layer, controlled using β parameters. This layer acts as a mixture model, returning a mixture of expert predictions:</p><p>is equivalent to a mean-constrained 0 -regularizer</p><formula xml:id="formula_4">Ω(·) = | · | ¯ w i 0 and i λ i L i &lt; 1.</formula><p>If the sum of weighted losses are smaller than 1, the loss with penalty is always the highest when all parameters are shared.</p><formula xml:id="formula_5">  h A =  β A,1 · · · β A,k  h A,1 , . . . h A,k (5) Group Lasso The 1 // 2 group lasso regularizer is G g=1 ||G 1,i,g || 2 ,</formula><p>a weighted sum over the 2 norms of the groups, often used to enforce subspace sharing ( <ref type="bibr">Zhou et al., 2010;</ref><ref type="bibr">´ Swirszcz and Lozano, 2012)</ref>. Our architecture learns a 1 // 2 group lasso over the two subspaces (with the same degrees of freedom), when all α A,B and α B,A -values are set to 0. When the outer layer α-values are not shared, we get block communication between the networks. where h A,k is the output of layer k of model A, while h A,t is the linear combination of all layer out- puts of model A that is fed into the final softmax layer.</p><p>Complexity Our model only adds a minimal num- ber of additional parameters compared to single-task models of the same architecture. In our experiments, we add α parameters between all task networks. As such, they scale linearly with the number of layers and quadratically with the number of tasks and sub- spaces, while β parameters scale linearly with the number of tasks and the number of layers. For a sluice network with M tasks, K layers per task, and 2 subspaces per layer, we thus obtain 4KM 2 addi- tional α parameters and KM β parameters. Training sluice networks is not much slower than training hard parameter sharing networks, with only an 5-7% in- crease in training time.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>Frustratingly Easy Domain Adaptation</head><p>The ap- proach to domain adaptation in <ref type="bibr" target="#b7">(Daumé III, 2007)</ref>, which relies on a shared and a private space for each task or domain, can be encoded in sluice networks by setting all α A,B -and α B,A -weights associated with G i,k,1 to 0, while setting all α A,B -weights associated with G i,k,2 to α B,B , and α B,A -weights associated with G i,k,2 to α A,A . Note that Daumé III (2007) dis- cusses three subspaces. We obtain this space if we only share one half of the second subspaces across the two networks.</p><p>Low Supervision <ref type="bibr">Søgaard and Goldberg (2016)</ref> propose a model where only the inner layers of two deep recurrent works are shared. This is ob- tained using heavy mean-constrained L 0 regular- ization over the first layer L i,1 , e.g., Ω(W ) = K i ||L i,1 || 0 with i λ i L(i) &lt; 1, while for the aux- iliary task, only the first layer β parameter is set to 1.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3">Prior Work as Instances of Sluice Networks</head><p>The architecture is very flexible and can be seen as a generalization over several existing algorithms for transfer and multi-task learning, including <ref type="bibr" target="#b5">(Caruana, 1998;</ref><ref type="bibr" target="#b7">Daumé III, 2007;</ref><ref type="bibr">Søgaard and Goldberg, 2016;</ref><ref type="bibr">Misra et al., 2016)</ref>. We show how to derive each of these below.</p><p>Hard Parameter Sharing in the two networks ap- pears if all α values are set to the same constant <ref type="bibr" target="#b5">(Caruana, 1998;</ref><ref type="bibr" target="#b6">Collobert and Weston, 2008)</ref>. This</p><p>Cross-Stitch Networks Misra et al. <ref type="formula">(2016)</ref> intro- duce cross-stitch networks that have α values control the flow between layers of two convolutional neural networks. Their model corresponds to setting the α- values associated with G i,j,1 be identical to those for G i,j,2 , and by letting all but the β-value associated with the outer layer be 0.</p><p>In our experiments, we include hard parameter sharing, low supervision, and cross-stitch networks as baselines. We do not report results for group lasso and frustratingly easy domain adaptation, which were consistently inferior on development data by some margin.  </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4">Experiments</head><p>Data We want to experiment with multiple loosely related NLP tasks, but also study performance across domains to make sure our architecture is not prone to overfitting. As testbed for our experiments, we there- fore choose the OntoNotes 5. We present experiments with the English portions of datasets, for which we show statistics in <ref type="table">Table 1. 1</ref> building block of our model. The BiLSTM consists of 3 layers with a hidden dimension of 100. At every time step, the model receives as input the concate- nation between the 64-dimensional embedding of a word and its character-level embedding produced by a Bi-LSTM over 100-dimensional character em- beddings. Both word and character embeddings are randomly initialized. The output layer is an MLP with a dimensionality of 100. We initialize α pa- rameters with a bias towards one source subspace for each direction and initialize β parameters with a bias towards the last layer 3 . We have found it most effective to apply the orthogonality constraint only to the weights associated with the LSTM inputs.</p><p>Tasks In multi-task learning, one task is usually considered the main task, while other tasks are used as auxiliary tasks to improve performance on the main task. As main tasks, we use chunking (CHUNK), named entity recognition (NER), and a simplified version of semantic role labeling (SRL) where we only identify headwords 2 , and pair them with part-of-speech tagging (POS) as an auxiliary task, following <ref type="bibr">(Søgaard and Goldberg, 2016)</ref>. Ex- ample annotations for each task can be found in <ref type="table" target="#tab_2">Table  2</ref>.</p><p>Training and Evaluation We train our models with stochastic gradient descent (SGD), an initial learning rate of 0.1, and learning rate decay <ref type="bibr">4</ref> . During training, we randomly and uniformly sample from the data for each task. We perform early stopping with patience of 2 based on the main task and hyperpa- rameter optimization on the in-domain development data of the newswire domain. We use the same hy- perparameters for all comparison models across all domains. We train our models on each domain and evaluate them both on the in-domain test set ( <ref type="table" target="#tab_4">Table  3</ref>, top) as well as on the test sets of all other domains <ref type="table" target="#tab_4">(Table 3</ref>, bottom) to evaluate their out-of-domain generalization ability 5 .</p><p>Baseline Models As baselines, we compare against i) a single-task model only trained on chunk- ing; ii) the low supervision model <ref type="bibr">(Søgaard and Goldberg, 2016)</ref>, which predicts the auxiliary task</p><p>Model We use a state-of-the-art BiLSTM-based sequence labeling model ( <ref type="bibr">Plank et al., 2016</ref>) as the <ref type="bibr">1</ref> Note that not all sentences are annotated with all tasks. <ref type="bibr">2</ref> We do this to keep pre-processing for SRL minimal. <ref type="bibr">3</ref> We experimented with different initializations for α and β parameters and found these to work best. <ref type="bibr">4</ref> We use SGD as Søgaard and Goldberg (2016) also employed SGD. Adam yielded similar performance differences. <ref type="bibr">5</ref> Due to this set-up, our results are not directly comparable to the results in <ref type="bibr">Søgaard and Goldberg (2016)</ref>   at the first layer; iii) an MTL model based on hard parameter sharing <ref type="bibr">(Caruana, 1993)</ref>; and iv) cross-stitch networks ( <ref type="bibr">Misra et al., 2016</ref>). We com- pare these against our complete sluice network with subspace constraints and learned α and β param- eters. We implement all models in DyNet (Neu- big et al., 2017) and make our code available at http:anonymized.com.</p><p>Our assumption is that MTL particularly helps to generalize to data whose distribution differs from the one seen during training. We thus first investigate how well sluice networks perform on in-domain and out-of-domain test data compared to state-of-the-art multi-task learning models by evaluating all models on chunking with POS tagging as auxiliary task.</p><p>is the same as during training. On out-of-domain data, hard parameter sharing performs better, demonstrat- ing the regularizing effect of MTL, which improves the model's generalization ability.</p><p>Results We show results on in-domain and out-of- domain tests sets in <ref type="table" target="#tab_4">Table 3</ref>. On average, sluice networks significantly outperform all other model architectures on both in-domain and out-of-domain data. Single task models and hard parameter shar- ing achieve the lowest results. We see that single task learning is comparatively most useful in the in- domain setting, where the distribution of the test data Both models are consistently outperformed by low supervision, which is only slightly better than hard pa- rameter sharing in the out-of-domain setting. Cross- stitch networks provide another significant perfor- mance improvement. Finally, sluice networks per- form best for all domains, except for the telephone conversation (tc) domain, where they are outper- formed by cross-stitch networks. The performance boost is particularly significant for the out-of-domain setting, where sluice networks add more than 1 point in performance compared to hard parameter sharing and almost .5 compared to the strongest baseline on average, demonstrating that sluice networks are par- ticularly useful to help a model generalize better.</p><p>In summary, this shows that our proposed model for learning which parts of multi-task models to share, with a small set of additional parameters to learn, can achieve significant and consistent improvements over strong baseline methods.   learning for NLP employs two tasks, typically pairing a main task with an auxiliary task. Existing studies ( <ref type="bibr" target="#b3">Bingel and Søgaard, 2017;</ref><ref type="bibr">Martínez Alonso and Plank, 2017</ref>) also only evaluate pair-wise interac- tions between tasks. ( <ref type="bibr" target="#b9">Hashimoto et al., 2017</ref>) is the only model we are aware of that learns from multiple stand-alone NLP tasks, but uses a task-specific archi- tecture to do so, while our model can be applied to any task combination. We use one sluice network to jointly learn our four tasks on the newswire domain and show results comparing it to the baseline models in <ref type="table" target="#tab_7">Table 5</ref> 6 .</p><p>Performance across Tasks We now compare sluice nets across different combinations of main and auxiliary tasks. In particular, we evaluate them on NER with POS tagging as auxiliary task and sim- plified semantic role labeling with POS tagging as auxiliary task. We show results in <ref type="table" target="#tab_6">Table 4</ref>. Sluice networks outperform the comparison models for both tasks on in-domain test data and successfully general- ize to out-of-domain test data on average. They yield the best performance on 5 out of 7 domains and 4 out of 7 domains for NER and semantic role labeling.</p><p>Discussion For MTL with four tasks, the low-level POS tagging and simplified SRL tasks are the only ones that benefit from hard parameter sharing. This is consistent with results in <ref type="table" target="#tab_4">Table 3</ref> and previous work <ref type="bibr">(Søgaard and Goldberg, 2016)</ref>. These results highlight that hard parameter sharing by itself is not sufficient for doing effective multi-task learning with semantic tasks. We rather require task-specific layers that can be used to transform the shared, low-level representation into a form that is able to capture more fine-grained task-specific knowledge.</p><p>Performance with all Tasks To the best of our knowledge, most of the existing work in multi-task  With sluice networks, we are able to outperform the single task models for all tasks except chunking in the all-tasks setting. Generally, MTL with more than two stand-alone tasks is little explored in NLP and the best choices for hyperparameters such as the sampling ratio, when to start, and stop training for each task and whether to freeze or continue training already learned parameters remain to be discovered.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5">Analysis</head><p>Task Properties and Performance Bingel and Sø- gaard (2017) correlate meta-characteristics of task pairs and gains from hard parameter sharing across a large set of NLP task pairs. Inspired by this study, we correlate various meta-characteristics with error reductions and α, β values in sluice networks, as well as in hard parameter sharing. Most importantly, we find that a) multi-task learning gains, also in sluice networks, are higher when there is less training data, and b) sluice networks learn to share more when there is more variance in the training data (cross-task αs are higher, intra-task αs lower). Generally, α val- ues at the inner layers correlate more highly with meta-characteristics than α values at the outer layers.</p><p>Overall, we find that learnable α parameters are preferable over constant α parameters. Learned β parameters marginally outperform skip-connections in the hard parameter sharing setting, while skip- connections are competitive with learned β values in the learned α setting. In addition, modeling sub- spaces explicitly helps for almost all domains. To our knowledge, this is the first time that subspaces within individual LSTM layers have been shown to be beneficial <ref type="bibr">7</ref> . Being able to effectively partition LSTM weights opens the way to research in inducing more structured neural network representations that encode task-specific priors. Finally, concatenation of layer outputs is a viable form to share information across layers as has also been demonstrated by recent models such as DenseNet ( <ref type="bibr" target="#b13">Huang et al., 2017</ref>). <ref type="figure" target="#fig_1">Figure 2</ref> presents the final α weights in the sluice networks for Chunking, NER, and SRL, trained with newswire as training data. We see that a) for the low-level simplified SRL, there is more sharing at inner layers, which is in line with <ref type="bibr">(Søgaard and Goldberg, 2016)</ref>, while Chunking and NER also rely on the outer layer, and b) more infor- mation is shared from the more complex target tasks than vice versa.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>Analysis of α values</head><p>Ablation Analysis Different types of sharing may be more important than others. In order to analyze this, we perform an ablation analysis in <ref type="table" target="#tab_9">Table 6</ref>. We investigate the impact of i) the α parameters; ii) the β parameters; and iii) the division into subspaces with an orthogonality penalty. We also evaluate whether concatenation of the outputs of each layer is a reason- able alternative to our mixture model.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>Analysis of β values</head><p>Inspecting the β values for the all-tasks sluice net in <ref type="table" target="#tab_7">Table 5</ref>, we find that all tasks place little emphasis on the first layer, but prefer to aggregate their representations in different later layers of the model: The more semantic NER and chunking tasks use the second and third layer to a similar extent, while for POS tagging and simplified SRL the representation of one of the two later layers dominates the prediction.</p><p>Ability to Fit Noise Sluice networks can learn to disregard sharing completely, so we expect them to be as good as single-task networks to fit random noise, potentially even better. We verify this by computing a learning curve for random relabelings of 200 sen- tences annotated with syntactic chunking brackets, as well as 100 gold standard POS-annotated sentences. <ref type="figure" target="#fig_2">Figure 3</ref> shows that hard parameter sharing, while learning faster because of the smoother loss surface in multi-task learning, is a good regularizer, confirm- ing the findings in <ref type="bibr">(Søgaard and Goldberg, 2016)</ref>. The sluice network is even better at fitting noise than the single-task models. We believe the ability to fit noise in practical settings (on datasets of average size, with average hyper-parameters) is more informative than Rademacher complexities ( <ref type="bibr">Zhang et al., 2017)</ref> and we argue that this result suggests introducing additional inductive bias may be beneficial. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="6">Related Work</head><p>In the context of deep neural networks, multi-task learning is often done with hard or soft parameter sharing of hidden layers. Hard parameter sharing was introduced by <ref type="bibr">Caruana (1993)</ref>. There, all hidden layers are shared between tasks which are projected into output layers specific to different tasks. This multi-task learning approach is easy to implement, reduces overfitting, but is only guaranteed to work for (certain types of) closely related tasks <ref type="bibr" target="#b1">(Baxter, 2000;</ref><ref type="bibr">Maurer, 2007)</ref>. <ref type="bibr">Peng and Dredze (2016)</ref> apply a variation of hard parameter sharing to multi-domain multi-task se- quence tagging with a shared CRF layer and domain- specific projection layers. <ref type="bibr">Yang et al. (2016)</ref> also use hard parameter sharing to jointly learn different sequence-tagging tasks (NER, POS tagging, Chunk- ing) across languages. They also use word and char- acter embeddings and share character embeddings in their model. Martínez <ref type="bibr">Alonso and Plank (2017)</ref> explore a similar set-up, but sharing is limited to the initial layer. In all three papers, the amount of sharing between the networks is fixed in advance.</p><p>In soft parameter sharing, on the other hand, each task has separate parameters and separate hidden lay- ers, as in our architecture, but the loss at the outer layer is regularized by the current distance between the models. In ( <ref type="bibr" target="#b8">Duong et al., 2015)</ref>, for example, the loss is regularized by the L 2 distance between (selec- tive parts of) the main and auxiliary models. Other regularization schemes used in multi-task learning include the 1 // 2 group lasso ( <ref type="bibr" target="#b0">Argyriou et al., 2008)</ref> and the trace norm <ref type="bibr" target="#b16">(Ji and Ye, 2009)</ref>. regularized with orthogonality and similarity con- straints for domain adaptation for computer vision. <ref type="bibr" target="#b13">Liu et al. (2017)</ref> use a similar technique for sentiment analysis.</p><p>In contrast to all the work mentioned above, we do not limit ourselves to a predefined way of sharing, but let the model learn which parts of the network to share using latent variables, the weights of which are learned in an end-to-end fashion.</p><p>The work most related to ours is ( <ref type="bibr">Misra et al., 2016)</ref>, who also look into learning what to share in multi-task learning. However, they only consider a very small class of the architectures that are learn- able in sluice networks. Specifically, they restrict themselves to learning split architectures. In such architectures, two n-layer networks share the inner- most k layers with 0 ≤ k ≤ n, and they learn k with a mechanism that is very similar to our α-values. Our work can be seen as a generalization of ( <ref type="bibr">Misra et al., 2016)</ref>, including a more in-depth analysis of augmented works.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="7">Conclusion</head><p>Selective Sharing <ref type="bibr" target="#b17">Kumar and Daumé III (2012)</ref> and <ref type="bibr">Maurer et al. (2013)</ref> enable selective sharing by allowing task predictors to select from sparse pa- rameter bases for homogeneous tasks. Several au- thors have discussed which parts of the model to share for heterogeneous tasks. <ref type="bibr">Søgaard and Goldberg (2016)</ref> perform experiments on which hidden layers to share in the context of hard parameter shar- ing with deep recurrent neural networks for sequence tagging. They show that low-level tasks, i.e. easy natural language processing tasks typically used for preprocessing such as part-of-speech tagging and named entity recognition, should be supervised at lower layers when used as auxiliary tasks.</p><p>Another line of work looks into separating the learned space into a private (i.e. task-specific) and shared space ( <ref type="bibr">Salzmann et al., 2010;</ref><ref type="bibr">Virtanen et al., 2011</ref>) to more explicitly capture the difference be- tween task-specific and cross-task features. To en- force such behavior, constraints are enforced to pre- vent the models from duplicating information. <ref type="bibr" target="#b4">Bousmalis et al. (2016)</ref> use shared and private encoders</p></div><figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_0"><head></head><label></label><figDesc>0 dataset (Weischedel et al., 2013), not only due to its high inter-annotator agreement (Hovy et al., 2006), but also because it enables us to analyze the generalization ability of our models across different tasks and domains. The OntoNotes dataset provides data annotated for an ar- ray of tasks across different languages and domains.</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_1"><head>Figure 2 :</head><label>2</label><figDesc>Figure 2: Heat maps of learned α parameters in trained sluice networks across (top to bottom): Chunking, NER, and SRL. We present inner, middle, and outer layer left to right.</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_2"><head>Figure 3 :</head><label>3</label><figDesc>Figure 3: Random noise learning curves. Note that we only plot accuracies for hard parameter sharing and sluice networks until they plateau.</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_1" validated="false"><head>words # sent # words # sent # words # sent # words # sent # words # sent # words # sent # words</head><label></label><figDesc></figDesc><table>Domains 
+Broadcast 
+Broadcast 
+Magazines (mz) Newswire (nw) Pivot corpus (pc) 
+Telephone 
+Weblogs (wb) 
+conversation (bc) 
+news (bn) 
+conversation (tc) 
+# sent # Train 11846 173289 10658 206902 6905 164217 34944 878223 21520 297049 11274 
+90403 
+16734 388851 
+Dev 
+2112 
+29957 
+1292 
+25271 
+641 
+15421 
+5893 147955 1780 
+25206 
+1367 
+11200 
+2297 
+49393 
+Test 
+2206 
+35947 
+1357 
+26424 
+779 
+17874 
+2326 
+60756 
+1869 
+25883 
+1306 
+10916 
+2281 
+52225 
+
+Table 1: Number of sentences and words for the splits of each domain in the OntoNotes 5.0 dataset. 
+
+WORDS 
+Abramov 
+had 
+a 
+car 
+accident 
+
+CHUNK O 
+B-VP B-NP 
+I-NP 
+I-NP 
+NER 
+B-PERSON O 
+O 
+O 
+O 
+SRL 
+B-ARG0 
+B-V 
+B-ARG1 I-ARG1 I-ARG1 
+POS 
+NNP 
+VBD DT 
+NN 
+NN 
+
+</table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_2" validated="false"><head>Table 2 :</head><label>2</label><figDesc></figDesc><table>Example annotations for CHUNK, NER, 
+SRL, and POS. 
+
+</table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_3" validated="false"><head></head><label></label><figDesc>who only train on the WSJ domain and use OntoNotes 4.0.</figDesc><table>In-domain results 
+
+System 
+bc 
+bn 
+mz 
+nw 
+pt 
+tc 
+wb 
+Avg 
+
+Baselines 
+Single task 
+90.80 92.20 91.97 92.76 97.13 89.84 92.95 92.52 
+Hard parameter sharing 90.31 91.73 92.33 92.22 96.40 90.59 92.84 92.35 
+Low supervision 
+90.95 91.70 92.37 93.40 96.87 90.93 93.82 92.86 
+Cross-stitch network 
+91.40 92.49 92.59 93.52 96.99 91.47 94.00 93.21 
+
+Ours Sluice network 
+91.72 92.90 92.90 94.25 97.17 90.99 94.40 93.48 
+
+Out-of-domain results 
+
+Baselines 
+Single task 
+85.95 87.73 86.81 84.29 90.91 84.55 73.36 84.80 
+Hard parameter sharing 86.31 87.73 86.96 84.99 90.76 84.48 73.56 84.97 
+Low supervision 
+86.53 88.39 87.15 85.02 90.19 84.48 73.24 85.00 
+Cross-stitch network 
+87.13 88.40 87.67 85.37 91.65 85.51 73.97 85.67 
+
+Ours Sluice network 
+87.95 88.95 88.22 86.23 91.87 85.32 74.48 86.15 
+
+</table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_4" validated="false"><head>Table 3 :</head><label>3</label><figDesc>Accuracy scores on in-domain and out-of-domain test sets for chunking (main task) with POS tagging as auxiliary task for different target domains for baselines and Sluice networks. Out-of-domain results for each target domain are averages across the 6 remaining source domains. Average error reduction over single-task performance is 12.8% for in-domain; 8.9% for out-of-domain. In-domain error reduction over hard parameter sharing is 14.8%.</figDesc><table></table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_6" validated="false"><head>Table 4 :</head><label>4</label><figDesc>Test accuracy scores for different target domains with nw as source domain for named entity recognition (main task) and simplified semantic role labeling with POS tagging as auxiliary task for baselines and Sluice networks. ID: in-domain. OOD: out-of-domain.</figDesc><table>System 
+
+CHUNK 
+NER 
+SRL 
+POS 
+
+Single task 
+89.30 
+94.18 96.64 88.62 
+Hard param. 
+88.30 
+94.12 96.81 89.07 
+Low super. 
+89.10 
+94.02 96.72 89.20 
+
+Sluice net 
+89.19 
+94.32 96.67 89.46 
+
+</table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_7" validated="false"><head>Table 5 :</head><label>5</label><figDesc></figDesc><table>All-tasks experiment: Test accuracy scores 
+for each task with nw as source domain averaged 
+across all target domains. 
+
+</table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_9" validated="false"><head>Table 6 :</head><label>6</label><figDesc></figDesc><table>Ablation analysis. Accuracy scores on out-of-domain (OOD) test sets for Chunking (main task) with 
+POS tagging as auxiliary task for different target domains for different configurations of sluice networks. 
+OOD scores for each target domain are averaged across the 6 remaining source domains. 
+
+</table></figure>
+
+			<note place="foot" n="6"> For the low supervision model, we predict the two high-level tasks, CHUNK and NER at the final layer.</note>
+
+			<note place="foot" n="7"> Liu et al. (2017) induce subspaces between separate LSTM layers.</note>
+		</body>
+		<back>
+
+			<div type="acknowledgement">
+			</div>
+
+			<div type="references">
+
+				<listBibl>
+
+<biblStruct xml:id="b0">
+	<analytic>
+		<title level="a" type="main">Convex Multi-Task Feature Learning</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Andreas</forename><surname>Argyriou</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Theodoros</forename><surname>Evgeniou</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Massimiliano</forename><surname>Pontil</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Machine Learning</title>
+		<imprint>
+			<date type="published" when="2008" />
+			<biblScope unit="volume">73</biblScope>
+			<biblScope unit="page" from="243" to="272" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b1">
+	<analytic>
+		<title level="a" type="main">A Model of Inductive Bias Learning</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Jonathan</forename><surname>Baxter</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">JAIR</title>
+		<imprint>
+			<biblScope unit="volume">12</biblScope>
+			<biblScope unit="page" from="149" to="198" />
+			<date type="published" when="2000" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b2">
+	<analytic>
+		<title level="a" type="main">Exploiting Task Relatedness for Multiple Task Learning</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Shai</forename><surname>Ben</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">-David</forename></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Reba</forename><surname>Schuller</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Learning Theory and Kernel Machines</title>
+		<imprint>
+			<publisher>Springer</publisher>
+			<date type="published" when="2003" />
+			<biblScope unit="page" from="567" to="580" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b3">
+	<analytic>
+		<title level="a" type="main">Identifying beneficial task relations for multi-task learning in deep neural networks</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Joachim</forename><surname>Bingel</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Anders</forename><surname>Søgaard</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of EACL</title>
+		<meeting>EACL</meeting>
+		<imprint>
+			<date type="published" when="2017" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b4">
+	<analytic>
+		<title level="a" type="main">Multitask Learning: A KnowledgeBased Source of Inductive Bias</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Konstantinos</forename><surname>Bousmalis</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">George</forename><surname>Trigeorgis</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Nathan</forename><surname>Silberman</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Dilip</forename><surname>Krishnan</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Dumitru</forename><surname>Erhan</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of NIPS. Rich Caruana</title>
+		<meeting>NIPS. Rich Caruana</meeting>
+		<imprint>
+			<date type="published" when="1993" />
+		</imprint>
+	</monogr>
+	<note>Proceedings of ICML</note>
+</biblStruct>
+
+<biblStruct xml:id="b5">
+	<analytic>
+		<title level="a" type="main">Multitask Learning</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Rich</forename><surname>Caruana</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Learning to Learn</title>
+		<imprint>
+			<publisher>Springer</publisher>
+			<date type="published" when="1998" />
+			<biblScope unit="page" from="95" to="133" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b6">
+	<analytic>
+		<title level="a" type="main">A Unified Architecture for Natural Language Processing: Deep Neural Networks with Multitask Learning</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Ronan</forename><surname>Collobert</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Jason</forename><surname>Weston</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of ICML</title>
+		<meeting>ICML</meeting>
+		<imprint>
+			<date type="published" when="2008" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b7">
+	<analytic>
+		<title level="a" type="main">Frustratingly Easy Domain Adaptation</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Hal</forename><surname>Daumé</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Iii</forename></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of ACL</title>
+		<meeting>ACL</meeting>
+		<imprint>
+			<date type="published" when="2007" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b8">
+	<analytic>
+		<title level="a" type="main">Low Resource Dependency Parsing: Crosslingual Parameter Sharing in a Neural Network Parser</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Long</forename><surname>Duong</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Trevor</forename><surname>Cohn</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Steven</forename><surname>Bird</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Paul</forename><surname>Cook</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of ACL</title>
+		<meeting>ACL</meeting>
+		<imprint>
+			<date type="published" when="2015" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b9">
+	<analytic>
+		<title level="a" type="main">A Joint Many-Task Model: Growing a Neural Network for Multiple NLP Tasks</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Kazuma</forename><surname>Hashimoto</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Caiming</forename><surname>Xiong</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Yoshimasa</forename><surname>Tsuruoka</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Richard</forename><surname>Socher</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of EMNLP</title>
+		<meeting>EMNLP</meeting>
+		<imprint>
+			<date type="published" when="2017" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b10">
+	<analytic>
+		<title level="a" type="main">Deep residual learning for image recognition</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Kaiming</forename><surname>He</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Xiangyu</forename><surname>Zhang</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Shaoqing</forename><surname>Ren</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Jian</forename><surname>Sun</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of CVPR</title>
+		<meeting>CVPR</meeting>
+		<imprint>
+			<date type="published" when="2016" />
+			<biblScope unit="page" from="770" to="778" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b11">
+	<analytic>
+		<title level="a" type="main">Long Short-Term Memory</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Sepp</forename><surname>Hochreiter</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Jürgen</forename><surname>Schmidhuber</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Neural Computation</title>
+		<imprint>
+			<biblScope unit="volume">9</biblScope>
+			<biblScope unit="issue">8</biblScope>
+			<biblScope unit="page" from="1735" to="1780" />
+			<date type="published" when="1997" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b12">
+	<analytic>
+		<title level="a" type="main">OntoNotes: The 90 % Solution</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Eduard</forename><surname>Hovy</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Mitchell</forename><surname>Marcus</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Martha</forename><surname>Palmer</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Lance</forename><surname>Ramshaw</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Ralph</forename><surname>Weischedel</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of NAACL-HLT</title>
+		<meeting>NAACL-HLT</meeting>
+		<imprint>
+			<date type="published" when="2006" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b13">
+	<analytic>
+		<title level="a" type="main">Densely Connected Convolutional Networks</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Gao</forename><surname>Huang</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Zhuang</forename><surname>Liu</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Kilian</forename><forename type="middle">Q</forename><surname>Weinberger</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Laurens</forename><surname>Van Der Maaten</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of CVPR 2017</title>
+		<meeting>CVPR 2017</meeting>
+		<imprint>
+			<date type="published" when="2017" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b14">
+	<analytic>
+		<title level="a" type="main">Clustered Multi-Task Learning: A Convex Formulation</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Laurent</forename><surname>Jacob</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Jean-Philippe</forename><surname>Vert</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">R</forename><surname>Francis</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Jean-Philippe</forename><surname>Bach</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><surname>Vert</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of NIPS</title>
+		<meeting>NIPS</meeting>
+		<imprint>
+			<date type="published" when="2009" />
+			<biblScope unit="page" from="745" to="752" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b15">
+	<analytic>
+		<title level="a" type="main">A Dirty Model for Multi-task Learning</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Ali</forename><surname>Jalali</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Sujay</forename><surname>Sanghavi</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Chao</forename><surname>Ruan</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Pradeep K</forename><surname>Ravikumar</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of NIPS</title>
+		<meeting>NIPS</meeting>
+		<imprint>
+			<date type="published" when="2010" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b16">
+	<analytic>
+		<title level="a" type="main">An Accelerated Gradient Method for Trace Norm Minimization</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Shuiwang</forename><surname>Ji</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Jieping</forename><surname>Ye</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of ICML</title>
+		<meeting>ICML</meeting>
+		<imprint>
+			<date type="published" when="2009" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b17">
+	<analytic>
+		<title level="a" type="main">Learning Task Grouping and Overlap in Multi-task Learning</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Abhishek</forename><surname>Kumar</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Hal</forename><surname>Daumé</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Iii</forename></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Proceedings of ICML</title>
+		<meeting>ICML</meeting>
+		<imprint>
+			<date type="published" when="2012" />
+			<biblScope unit="page" from="1383" to="1390" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+				</listBibl>
+			</div>
+		</back>
+	</text>
+</TEI>

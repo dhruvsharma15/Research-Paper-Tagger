@@ -1,0 +1,631 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://www.tei-c.org/ns/1.0 C:\grobid-0.5.1\grobid-0.5.1\grobid-home/schemas/xsd/Grobid.xsd"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+	<teiHeader xml:lang="en">
+		<encodingDesc>
+			<appInfo>
+				<application version="0.5.1-SNAPSHOT" ident="GROBID" when="2018-11-08T11:20+0000">
+					<ref target="https://github.com/kermitt2/grobid">GROBID - A machine learning software for extracting information from scholarly documents</ref>
+				</application>
+			</appInfo>
+		</encodingDesc>
+		<fileDesc>
+			<titleStmt>
+				<title level="a" type="main">Tutorial on Answering Questions about Images with Deep Learning</title>
+			</titleStmt>
+			<publicationStmt>
+				<publisher/>
+				<availability status="unknown"><licence/></availability>
+				<date type="published" when="2016-10-04">4 Oct 2016</date>
+			</publicationStmt>
+			<sourceDesc>
+				<biblStruct>
+					<analytic>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Mateusz</forename><surname>Malinowski</surname></persName>
+						</author>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Mario</forename><surname>Fritz</surname></persName>
+						</author>
+						<author>
+							<affiliation key="aff0">
+								<orgName type="department">Max Planck Institute for Informatics Saarbrücken</orgName>
+								<address>
+									<country key="DE">Germany</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<affiliation key="aff1">
+								<address>
+									<settlement>Preface</settlement>
+								</address>
+							</affiliation>
+						</author>
+						<title level="a" type="main">Tutorial on Answering Questions about Images with Deep Learning</title>
+					</analytic>
+					<monogr>
+						<imprint>
+							<date type="published" when="2016-10-04">4 Oct 2016</date>
+						</imprint>
+					</monogr>
+				</biblStruct>
+			</sourceDesc>
+		</fileDesc>
+		<profileDesc>
+			<abstract>
+				<p>Together with the development of more accurate methods in Computer Vision and Natural Language Understanding , holistic architectures that answer on questions about the content of real-world images have emerged. In this tutorial, we build a neural-based approach to answer questions about images. We base our tutorial on two datasets: (mostly on) DAQUAR, and (a bit on) VQA. With small tweaks the models that we present here can achieve a competitive performance on both datasets, in fact, they are among the best methods that use a combination of LSTM with a global, full frame CNN representation of an image. We hope that after reading this tutorial, the reader will be able to use Deep Learning frameworks, such as Keras and introduced Kraino, to build various architectures that will lead to a further performance improvement on this challenging task.</p>
+			</abstract>
+		</profileDesc>
+	</teiHeader>
+	<text xml:lang="en">
+		<body>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2">Dataset</head><p>In <ref type="bibr">[1]</ref>: ! head -15 data/daquar/qa.894.raw.train.format_triple what is on the right side of the black telephone and on the left side of the red chair ? desk image3 what is in front of the white door on the left side of the desk ? telephone image3 what is on the desk ? book, scissor, papers, tape dispenser image3 what is the largest brown objects ? carton image3 what color is the chair in front of the white wall ? red image3</p><p>Note that the format is: question, answer (could be many answer words), and the image. Let us have a look at <ref type="figure" target="#fig_0">Figure 1</ref>. The figure lists images with associated question-answer pairs. It also comments on challenges associated with question-answer- image triplets. We see that to answer properly on the wide range of questions, an answerer not only needs to understand the scene visually or to just understand the question, but also, arguably, has to resort to the common sense knowledge, or even know the preferences of the person asking the question, e.g. what 'behind' exactly means in 'What is behind the table?'. Hence, architectures that answer questions about images have to face many challenges. Ambiguities make it also difficult to judge the provided answers. We revisit this issue in a later section. Meantime, a curious reader may try to answer the following question.</p><p>Can you spot ambiguities that are present in the first column of the figure? Think of a spatial relationship between an observer, object of interest, and the world.</p><p>The following code returns a dictionary of three views on the DAQUAR dataset. For now, we look only into the 'text' view. dp <ref type="bibr">['text']</ref> returns a function from a dataset split into the dataset's textual view. Executing the following code makes it more clear.</p><p>In [ ]: #TODO: Execute the following procedure (Shift+Enter in the Notebook) from kraino.utils import data_provider dp = data_provider.select['daquar-triples'] train_text_representation = dp <ref type="bibr">['text']</ref>(train_or_test='train')</p><p>This view specifies how questions are ended ('?'), answers are ended ('.'), answer words are delimited (DAQUAR sometimes has a set of answer words as an answer, for instance 'knife, fork' may be an answer answer), but most important, it has questions (key 'x'), answers (key 'y'), and names of the corresponding images (key 'img name'). Summary DAQUAR consists of question-answer-image triplets. Question-answer pairs for different folds are accessible from executing the following code.</p><p>data_provider.select <ref type="bibr">['text']</ref> Finally, as we see in <ref type="figure" target="#fig_0">Figure 1</ref>, DAQUAR poses many challenges in designing good architectures, or evaluation metrics.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3">Textual Features</head><p>We have an access to a textual representation of questions. This is however not very helpful since neural networks expect a numerical input, and hence we cannot really work with the raw text. We need to transform the textual input into some numerical value or a vector of values. One particularly successful representation is called one-hot vector and it is a binary vector with exactly one non-zero entry. This entry points to the corresponding word in the vocabulary. See the illustration shown in <ref type="figure" target="#fig_3">Figure 2</ref>.</p><p>The reader can pause here a bit to answer the following questions.</p><p>Can you sum up the one-hot vectors for the <ref type="table">'What table is behind the table?</ref>'. How would you interpret the resulting vector? Why is it a good idea to work with one-hot vector represetantions of the text?</p><p>As we see from the illustrative example above, we first need to build a suitable vocabulary from our raw textual training data, and next transform them into one-hot representations. The following code can do this.  In many parts of this tutorial, we use Kraino, which was developed for the purpose of this tutorial to simplify the development of various 'question answering' models through prototyping.</p><p>from kraino.utils.input_output_space import build_vocabulary # This function takes wordcounts, # and returns word2index -mapping from words into indices, # and index2word -mapping from indices to words.</p><formula xml:id="formula_0">word2index_x, index2word_x = build_vocabulary( this_wordcount=wordcount_x, truncate_to_most_frequent=0) word2index_x</formula><p>In addition, we use a few special, extra symbols that do not occur in the training dataset. Most important are &lt; pad &gt; and &lt; unk &gt;. We use the former to pad sequences in order to have the same number of temporal elements; we use the latter for words (at test time) that do not exist in the training set. Armed with the vocabulary, we can build one-hot representations of the training data. However, this is not necessary and may even be wasteful. Our one-hot representation of the input text does not explicitly build long and sparse vectors, but instead it operates on indices. The example from <ref type="figure" target="#fig_3">Figure 2</ref> would be encoded as <ref type="bibr">[0,</ref><ref type="bibr">1,</ref><ref type="bibr">4,</ref><ref type="bibr">2,</ref><ref type="bibr">7,</ref><ref type="bibr">3]</ref>.</p><p>Due to the sparsity existing in the one-hot representation, we can more efficiently operate on indices instead of performing full linear transformations by matrix-vector multiplications. This is reflected in the following claim.</p><p>Claim: Let x be a binary vector with exactly one value 1 at the position index, that is</p><formula xml:id="formula_1">x[index] = 1. Then W [:, index] = W x</formula><p>where W [:, b] denotes a vector built from a column b of W . This shows that matrix-vector multiplication can be replaced by retrieving a right vector of parameters according to the index.</p><p>Can you show that the claim is valid?</p><p>We can encode textual questions into one-hot vector representations by executing the following code. At the last step, we encode test questions. We need them later to see how well our models generalize to new question-answer- image triplets. Remember, however, that we should use the vocabulary we generated from the training samples.</p><p>Why should we use the training vocabulary to encode test questions?</p><p>In [ ]: test_text_representation = dp <ref type="bibr">['text']</ref> With the encoded question-answer pairs we finish this section. However, before delving into details of building and training new models, let us have a look at the summary to see bigger picture.</p><p>Summary We started from raw questions from the training set. We use them to build a vocabulary. Next, we encode questions into sequences of one-hot vectors based on the vocabulary. Finally, we use the same vocabulary to encode questions from the test set. If a word is absent, we use an extra token &lt; unk &gt; to denote this fact, so that we encode the &lt; unk &gt; token, not the word.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4">Language Only Models</head></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.0.1">Training</head><p>As you may already know, we train models by weights updates. Let x and y be training samples (an input, and an output), and y) be an objective function. The formula for weights updates is:</p><formula xml:id="formula_2">w := w − α∇ y; w)</formula><p>with α that we call the learning rate, and ∇ that is a gradient wrt. the weights w. The learning rate is a hyper-parameter that must be set in advance. The rule shown above is called the SGD update, but other variants are also possible. In fact, we use its variant called ADAM <ref type="bibr" target="#b10">[Kingma and Ba, 2014]</ref>.</p><p>We cast the question answering problem into a classification framework, so that we classify an input x into some class that represents an answer word. Therefore, we use, commonly used in the classification, logistic regression as the objective:</p><formula xml:id="formula_3">y; w) := 1{y = y} log p(y | x, w) y ∈C</formula><p>where C is a set of all classes, and p(y | x, w) is the softmax: e <ref type="bibr">x)</ref> . Here φ(x) denotes an output of a model (more precisely, it is often a response of a neural network to the input, just before softmax of the neural network is applied). Note, however, that another variant of providing answers, called the answer generation, is also possible . For training, we need to execute the following code.</p><formula xml:id="formula_4">w y φ(x) / z e w z φ(</formula><p>training(gradient_of_the_model, optimizer='Adam') Summary Given a model, and an optimization procedure (SGD, Adam, etc.) all we need is to compute gradient of the model ∇ y; w) wrt. to its parameters w, and next plug it to the optimization procedure.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.0.2">Theano</head><p>Since computing gradients ∇ y; w) may quickly become tedious, especially for more complex models, we search for tools that could automatize this process. Imagine that you build a model M and you get its gradient ∇M by just executing the tool, something like the following piece of code.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>nabla_M = compute_gradient_symbolically(M,x,y)</head><p>This would definitely speed up prototyping. Theano <ref type="bibr" target="#b2">[Bastien et al., 2012]</ref> is such a tool that is specifically tailored to work with deep learning models. For a broader understanding of Theano, you can check a suitable tutorial 6 .</p><p>The following coding example defines ReLU, a popular activation function defined as ReLU (x) = max(x, 0), as well as derive its derivative using Theano. Note however that, with this example, we obviously only scratch the surface. Can you derive a derivative of ReLU on your own? Consider two cases.</p><p>It should also be mentioned that ReLU is a non-differentiable function at the point 0, and therefore, technically, we compute its sub-gradient -this is however still fine for Theano.</p><p>Summary To compute gradient symbolically, we can use Theano. This speeds up prototyping, and hence developing new question answering models.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.0.3">Keras</head><p>Keras <ref type="bibr" target="#b4">[Chollet, 2015]</ref> builds upon Theano, and significantly simplifies creating new deep learning models as well as training such models, effectively speeding up the prototyping even further. Keras also abstracts away from some technical burden such as a symbolic variable creation. Many examples of using Keras can be found by following the links: https://keras.io/getting-started/sequential-model-guide/, and https://keras.io/ getting-started/functional-api-guide/. Note that, in the tutorial we use an older sequential model. Please also pay attention to the version of the Keras, since not all versions are compatible with this tutorial.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.0.4">Models</head><p>For the purpose of the Visual Turing Test, and this tutorial, we have compiled a light framework that builds on top of Keras, and simplify building and training 'question answering' machines. With the tradition of using Greek names, we call it Kraino. Note that some parts of the Kraino, such as a data provider, were already covered in this tutorial.</p><p>In the following, we will go through BOW and LSTM approaches to answer questions about images, but, surprisingly, without the images. It turns out that a substantial fraction of questions can be answered without an access to an image, but rather by resorting to a common sense (or statistics of the dataset). For instance, 'what can be placed at the table?', or 'How many eyes this human have?'. Answers like 'chair' and '2' are quite likely to be good answers. <ref type="figure" target="#fig_5">Figure 3</ref> illustrates the BOW (Bag Of Words) method. As we have already seen before, we first encode the input sentence into one-hot vector representations. Such a (very) sparse representation is next embedded into a denser space by a matrix W e . Next, the denser representations are summed up and classified via 'Softmax'. Notice that, if W e were an identity matrix, we would obtain a histogram of the word's occurrences.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4.0.5">BOW</head><p>What is your biggest complain about such a BOW representation? What happens if instead of 'What is behind the table' we would have 'is What the behind table'? How does the BOW representation change?</p><p>Let us now define a BOW model using our tools.</p><p>In [ ]: #== Model definition # First we define a model using keras/kraino from keras.layers.core import Activation from keras.layers.core import Dense from keras.layers.core import Dropout from keras.layers.core import TimeDistributedMerge from keras.layers.embeddings import Embedding from kraino.core.model_zoo import AbstractSequentialModel from kraino.core.model_zoo import AbstractSingleAnswer from kraino.core.model_zoo import AbstractSequentialMultiplewordAnswer from kraino.core.model_zoo import Config from kraino.core.keras_extensions import DropMask from kraino.core.keras_extensions import LambdaWithMask from kraino.core.keras_extensions import time_distributed_masked_ave # This model inherits from AbstractSingleAnswer, # and so it produces single answer words # To use multiple answer words, # you need to inherit from AbstractSequentialMultiplewordAnswer class BlindBOW(AbstractSequentialModel, AbstractSingleAnswer):</p><p>""" BOW Language only model that produces single word answers.   <ref type="figure" target="#fig_6">Figure 4</ref> illustrates, the (temporarily) first word embedding is given to an RNN unit. The RNN unit next processes such an embedding and outputs to the second RNN unit. This unit takes both the output of the first RNN unit and the 2nd word embedding as inputs, and outputs some algebraic combination of both inputs. And so on. The last recurrent unit builds the representation of the whole sequence. Its output is next given to Softmax for the classification. One among the challenges that such approaches have to deal with is maintaining long-term dependencies. Roughly speaking, as new inputs are coming in the following steps it is getting easier to 'forget' information from the beginning (the first temporal step). LSTM <ref type="bibr" target="#b7">[Hochreiter and Schmidhuber, 1997]</ref> and GRU <ref type="bibr" target="#b3">[Cho et al., 2014</ref>] are two particularly popular Recurrent Neural Networks that can preserve such longer dependencies to some extent 7 .</p><formula xml:id="formula_5">""" def create(self): self.add(Embedding( self._config.input_dim, self._config.textual_embedding_dim, mask_zero=True)) self.add(LambdaWithMask (time_distributed_masked_ave, output_shape=[self.output_shape[2]])) self.add(DropMask()) self.add(Dropout(0.5)) self.add(Dense(self._config.output_dim)) self.add(Activation('softmax')) In [ ]: model_config = Config( textual_embedding_dim=500, input_dim=len</formula><p>Let us create a Recurrent Neural Network in the following.  The curious reader is encouraged to experiment with the language-only models. For instance, to see the influence of particular modules to the overall performance, the reader can do the following exercise.</p><p>Change the number of hidden states. Change the number of epochs used to train a model. Modify models by using more RNN layers, or deeper classifiers.</p><p>Summary RNN models, as opposite to BOW, consider order of the words in the question. Moreover, a substantial number of questions can be answered without any access to images. This can be explained as models learn some specific dataset statistics, some of them can be interpreted as common sense knowledge.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5">Evaluation Measures</head><p>To be able to monitor a progress on a task, we need to find ways to evaluate architectures on the task. Otherwise, we would not know how to judge architectures, or even worse, we would not even know what the goal is. Moreover, we should also aim at automatic evaluation measures, otherwise reproducibility is questionable, and the evaluation costs are high.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5.0.7">Ambiguities</head><p>Although an early work on the Visual Turing Test argues for keeping the answer words from a fixed vocabulary in order to keep an evaluation simpler <ref type="bibr">Fritz, 2014a,b, 2015]</ref>, it is still difficult to automatically evaluate architectures due to ambiguities that occur in the answers. We have ambiguities in naming objects, sometimes due to synonyms, but sometimes due to fuzziness. For instance, is 'chair' == 'armchair' or 'chair' != 'armchair' or something in between? Such semantic boundaries become even more fuzzy when we increase the number of categories. We could easily find a mutually exclusive set of 10 different categories, but what if there are 1000 categories, or 10000 categories? Arguably, we cannot think in terms of an equivalence class anymore, but rather in terms of similarities. That is 'chair' is semantically more similar to 'armchair', than to 'horse'. This simple example shows the main drawback of a traditional, binary evaluation measure which is Accuracy. This metric scores 1 if the names are the same and 0 otherwise. So that Acc('chair', 'armchair') == Acc('chair', 'horse'). We call these ambiguities, word-level ambiguities, but there are other ambiguities that are arguably more difficult to handle. For instance, the same question can be phrased in multiple other ways.  <ref type="figure" target="#fig_0">Figure 1</ref> shows a few ambiguities that exists in DAQUAR.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5.0.8">Wu-Palmer Similarity</head><p>Given an ontology a Wu-Palmer Similarity between two words (or broader concepts) is a soft measure defined as</p><formula xml:id="formula_6">W uP (a, b) := lca(a, b) depth(a) + depth(b)</formula><p>where lca(a, b) is the least common ancestor of a and b, and depth(a) is depth of a in the ontology. <ref type="figure" target="#fig_7">Figure 5</ref> shows a toy-sized ontology. The curious reader can, based on <ref type="figure" target="#fig_7">Figure 5</ref>, address the following questions.</p><p>What is WuP(Dog, Horse) and WuP(Dog, Dalmatian) according to the toy-sized ontology? Can you calculate Acc(Dog, Horse) and Acc(Dog, Dalmatian)? </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5.0.9">WUPS</head><p>Wu-Palmer Similarity depends on the choice of ontology. One popular, large ontology is WordNet <ref type="bibr" target="#b17">[Miller, 1995</ref><ref type="bibr" target="#b5">, Fellbaum, 1999</ref>. Although Wu-Palmer Similarity may work on shallow ontologies, we are rather interested in ontologies with hundreds or even thousands of categories. In indoor scenarios, it turns out that many indoor 'things' share similar levels in the ontology, and hence Wu-Palmer Similarities are very small between two entities. The following code exemplifies the issue.</p><p>In [ ]: from nltk.corpus import wordnet as wn armchair_synset = wn.synset('armchair.n.01') chair_synset = wn.synset('chair.n.01') wardrobe_synset = wn.synset('wardrobe.n.01') print(armchair_synset.wup_similarity(armchair_synset)) print(armchair_synset.wup_similarity(chair_synset)) print(armchair_synset.wup_similarity(wardrobe_synset)) wn.synset('chair.n.01').wup_similarity(wn.synset('person.n.01'))</p><p>As we can see that 'armchair' and 'wardrobe' are surprisingly close to each other. It is because, for large ontologies, all the indoor 'things' are semantically 'indoor things'. This issue has motivated us to define thresholded Wu-Palmer Similarity Score, defined as follows</p><formula xml:id="formula_7">W uP (a, b) if W uP (a, b) ≥ τ 0.1 · W uP (a, b) otherwise</formula><p>where τ is a hand-chosen threshold. Empirically, we found that τ = 0.9 works fine on DAQUAR <ref type="bibr" target="#b12">[Malinowski and Fritz, 2014a]</ref>. Moreover, since DAQUAR has answers as sets of answer words, so that 'knife,fork' == 'fork,knife', we have extended the above measure to work with the sets. We call it Wu-Palmer Set score, or shortly WUPS.</p><p>A detailed exposition of WUPS is beyond this tutorial, but a curious reader is encouraged to read the 'Performance Measure' paragraph in <ref type="bibr" target="#b12">Malinowski and Fritz [2014a]</ref>. Note that the measure in <ref type="bibr" target="#b12">Malinowski and Fritz [2014a]</ref> is defined broader, and essentially it abstracts away from any particular similarities such as Wu-Palmer Similarity, or an ontology. WUPS at 0.9 is WUPS with threshold τ = 0.9. It is worth noting, that a practical implementation of WUPS needs to deal with synsets. Thus it is recommended to download the script from http://datasets.d2.mpi-inf.mpg.de/ mateusz14visual-turing/calculate_wups.py or re-implement it with caution.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5.0.10">Consensus</head><p>The consensus measure handles ambiguities that are caused by various interpretations of a question or an image. In this tutorial, we do not cover this measure. A curious reader is encouraged to read the 'Human Consensus' in Malinowski et al. <ref type="bibr">[2015]</ref>.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5.0.11">A few caveats</head><p>We present a few caveats when using WUPS. These can be especially useful if one wants to adapt WUPS to other datasets.</p><p>Lack of coverage Since WUPS is based on an ontology, not always it recognizes words. For instance 'garbage bin' is missing, but 'garbage can' is perfectly fine. You can check it by yourself, either with the source code provided above, or by using an online script 8 .</p><p>Synsets The execution of the following code wn.synsets('chair') produces a list with many elements. These elements are semantically equivalent 9 .</p><p>For instance the following definition of 'chair'</p><p>wn.synset('chair.n.03').definition() indicates a person (e.g. a chairman). Indeed, the following gives quite high value wn.synset('chair.n.03').wup_similarity(wn.synset('person.n.01'))</p><p>however the following one has a more preferred, much lower value wn.synset('chair.n.01').wup_similarity(wn.synset('person.n.01'))</p><p>How to deal with such a problem? In DAQUAR we take an optimistic perspective and always consider the highest similarity score. This works with WUPS 0.9 and a restricted indoor domain with a vocabulary based only on the training set. To sum up, this issue should be taken with a caution whenever WUPS is adapted to other domains.</p><p>Ontology Since WUPS is based on an ontology, specifically on WordNet, it may give different scores on different ontolo- gies, or even on different versions of the same ontology.</p><p>Threshold A good threshold τ is dataset dependent. In our case τ = 0.9 seems to work well, while τ = 0.0 is too forgivable and is rather reported due to the 'historical' reasons. However, following our papers, you should still consider to report plain set-based accuracy scores (so that Acc('knife,'fork','fork,knife')==1; it can be computed by our script 10 using the argument -1 to WUPS.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5.0.12">Summary</head><p>WUPS is an evaluation measure that works with sets and word-level ambiguities. Arguably, WUPS at 0.9 is the most practical measure.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="6">New Predictions</head><p>Once the training of our models is over, we can evaluate their performance on a previously unknown test set. In the following, we show how to make predictions using the already discussed blind models.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="6.0.13">Predictions -BOW</head><p>We start from encoding textual input into one-hot vector representations.</p><p>In [ ]: test_text_representation = dp <ref type="bibr">['text']</ref> Let us see the predictions.</p><p>In [ ]: from numpy import random test_image_name_list = test_text_representation['img_name'] indices_to_see = random.randint(low=0, high=len(test_image_name_list), size=5) for index_now in indices_to_see:</p><formula xml:id="formula_8">print(test_raw_x[index_now], predictions_answers[index_now])</formula><p>Without looking at images, a curious reader may attempt to answer the following questions.</p><p>Do you agree with the answers given above? What are your guesses? Of course, neither you nor the model have seen any images so far.</p><p>However, what happens if the reader can actually see the images?</p><p>Execute the code below. Do your answers change after seeing the images?</p><p>In <ref type="bibr">[1]</ref>: from matplotlib.pyplot import axis from matplotlib.pyplot import figure from matplotlib.pyplot import imshow import numpy as np from PIL import Image Finally, let us also see the ground truth answers by executing the following code.</p><p>In [ ]: print('question, prediction, ground truth answer') for index_now in indices_to_see:</p><formula xml:id="formula_9">print(test_raw_x[index_now], predictions_answers[index_now], test_raw_y[index_now])</formula><p>In the code above, we have randomly taken questions, and hence different executions of the code may lead to different answers.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="6.0.14">Predictions -RNN</head><p>Let us do similar predictions with a Recurrent Neural Network. This time, we use Kraino, to make the code shorter.</p><p>In A curious reader is encouraged to try the following exercise.</p><p>Visualise question, predicted answers, ground truth answers as before.</p><p>Check also images.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="7">Visual Features</head><p>All the considered so far architectures predict answers based only on questions, even though the questions concern images. Therefore, in this section, we also build visual features. As shown in <ref type="figure" target="#fig_8">Figure 6</ref>, a quite common practice is to:</p><p>1. Take an already pre-trained CNN; often pre-training is done in some large-scale classification task such as ImageNet <ref type="bibr" target="#b19">[Russakovsky et al., 2014]</ref>. 2. 'Chop off' a CNN representation after some layer. We use responses of that layer as visual features.</p><p>In this tutorial, we use features extracted from the second last 4096 dimensional layer of the VGG Net <ref type="bibr" target="#b21">[Simonyan and Zisserman, 2014]</ref>. We have already extracted features in advance using Caffe  -another excellent framework for deep learning, particularly good for CNNs. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="8">Vision+Language</head><p>Given visual features, we can now build a full model that answer questions about images. As we can see in <ref type="figure" target="#fig_0">Figure 1</ref>, it is hard to answer correctly on questions without seeing images.</p><p>Let us create an input as a pair of textual and visual features using the following code.</p><p>In [ ]: train_input = <ref type="bibr">[train_x, train_visual_features]</ref> In the following, we investigate two approaches to question answering: an orderless BOW, and an RNN.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="8.0.15">BOW + Vision</head><p>Similarly to our blind model, we start with a BOW encoding of a question. Here, we explore two ways of combining both modalities (circle with 'C' in <ref type="figure" target="#fig_9">Figure 7)</ref>: concatenation, and piece-wise multiplication. For the sake of simplicity, we do not fine-tune the visual representation (dotted line symbolizes the barrier that blocks back-propagation in <ref type="figure" target="#fig_9">Figure 7</ref>). In [ ]: #== Model definition # First we define a model using keras/kraino output_dim=len(word2index_y.keys()), visual_dim=train_visual_features.shape <ref type="bibr">[1]</ref> At the end of this section, a curious reader can try to answer the following questions.</p><p>If we merge language and visual features with 'mul', do we need to set both embeddings to have the same number of dimensions? That is, do we require to have textual_embedding_dim == visual_embedding_dim?</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="8.0.16">RNN + Vision</head><p>Now, we repeat the BOW experiments but with RNN. <ref type="figure" target="#fig_10">Figure 8</ref> depicts the architecture.</p><p>In [ ]: #== Model definition # First we define a model using keras/kraino from keras.models import Sequential from keras.layers.core import Activation from keras.layers.core import Dense from keras.layers.core import Dropout from keras.layers.core import Layer  </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="17">Batch Size</head><p>We can do training with batch size set to 512. If an error occurs due to a memory consumption, lowering the batch size should help.</p><p>In [ ]: #== Model training text_image_rnn_model.fit( train_input, train_y, batch_size=512, nb_epoch=40, validation_split=0.1, show_accuracy=True)</p><p>A curious reader may experiment with a few different batch sizes, and answer the following questions.</p><p>Can you experiment with batch-size=1, and next with batch-size=5000? Can you explain both issues regarding the batch size? When do you get the best performance, with multiplication, concatenation, or summation?</p><p>Summary As previously, using RNN makes the sequence processing order-aware. This time, however, we combine two modalities so that the whole model 'sees' images. Finally, it is also important how both modalities are combined. The models that we have built so far can be transferred to other dataset. Let us consider a recently introduced large-scale dataset, which is named VQA <ref type="bibr" target="#b1">[Antol et al., 2015]</ref>. In this section, we train and evaluate VQA models. Since the reader should already be familiar with all the pieces, we just quickly jump into coding. For the sake of simplicity, we use only BOW architectures. Since VQA hides the test data for the purpose of challenge, we use the publicly available validation set to evaluate the architectures.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="10.0.21">VQA Language Features</head><p>In  </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="11">New Research Opportunities</head><p>The task that tests machines via questions about the content of images is a quite new research direction that recently has gained popularity. Therefore, many opportunities are available. We end the tutorial by enlisting a few possible directions.</p><p>• Global Representation In this tutorial, we use a global, full-frame representation of the images. Such a represen- tation may destroy too much information. Therefore, it seems a fine-grained alternatives should be valid options. Maybe we should use detections, or object proposals (e.g. <ref type="bibr" target="#b8">Ilievski et al. [2016]</ref> use a question dependent detections, and Mokarian Forooshani et al. <ref type="bibr">[2016]</ref> use object proposals to enrich a visual representation). We could also use attention models, which become quite successful in answering questions about images <ref type="bibr" target="#b11">[Lu et al., 2016]</ref>. However, there is still a hope for global representations if they are trained end-to-end for the task, and question dependent. In the end, our global representation is extracted from CNNs trained on a different dataset (ImageNet), and for different task (object classification).</p><p>• 3D Scene Representation Most of current approaches, and all neural-based approaches, are trained on 2D images.</p><p>However, some spatial relations such as 'behind' may need a 3d representation of the scene (in fact <ref type="bibr" target="#b12">Malinowski and Fritz [2014a]</ref> design spatial rules using a 3d coordinate system). DAQUAR is built on top of Silberman et al. <ref type="bibr">[2012]</ref> that provides both modes (2D images, and 3D depth), however, such a richer visual information is currently not fully exploited.</p><p>• Recurrent Neural Networks There is disturbingly small gap between BOW and RNN models. As we have seen in the tutorial, some questions clearly require an order, but such questions at the same time become longer, semantically more difficult, and require better a visual understanding of the world. To handle them we may need other RNNs architectures, or better ways of fusing two modalities, or better Global Representation.</p><p>• Logical Reasoning There are few questions that require a bit more sophisticated logical reasoning such as negation.</p><p>Can Recurrent Neural Networks learn such logical operators? What about compositionality of the language? Perhaps, we should aim at mixed approaches, similar to the work of Andreas et al. <ref type="bibr">[2016]</ref>.</p><p>• Language + Vision There is still a small gap between Language Only and Vision + Language models. But clearly, we need pictures to answer questions about images. So what is missing here? Is it due to Global Representation, 3D Scene Representation or there is something missing in fusing two modalities? The latter is studied, with encouraging results, in Fukui et al. <ref type="bibr">[2016]</ref>.</p><p>• Learning from Few Examples In the Visual Turing Test, many questions are quite unique. But then how the models can generalize to new questions? What if a question is completely new, but its parts have been already observed (compositionality)? Can models guess the meaning of a new word from its context? • Ambiguities How to deal with ambiguities? They are all inherent in the task, so cannot be just ignored, and should be incorporated into question answering methods as well as evaluation metrics.</p><p>• Evaluation Measures Although we have WUPS and Consensus, both are far from being perfect. Consensus has higher annotation cost for ambiguous tasks, and is unclear how to formally define good consensus measure. WUPS is an ontology dependent, which may be quite costly to build for all interesting domains? Finally, the current evaluation metrics ignore the tail of the answer distribution encouraging models to focus only on a few most frequent answers.</p></div><figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_0"><head>Figure 1 :</head><label>1</label><figDesc>Figure 1: Challenges present in the DAQUAR dataset.</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_1"><head></head><label></label><figDesc>In [ ]: # let us check some entries of the text's representation n_elements = 10 print('== Questions:') print_list(train_text_representation['x'][:n_elements]) print print('== Answers:') print_list(train_text_representation['y'][:n_elements]) print print('== Image Names:') print_list(train_text_representation['img_name'][:n_elements])</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_2"><head></head><label></label><figDesc>In [ ]: from toolz import frequencies train_raw_x = train_text_representation['x']</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_3"><head>Figure 2 :</head><label>2</label><figDesc>Figure 2: One hot representations of the textual words in the question. # we start from building the frequencies table wordcount_x = frequencies(' '.join(train_raw_x).split(' ')) # print the most and least frequent words n_show = 5 print(sorted(wordcount_x.items(), key=lambda x: x[1], reverse=True)[:n_show]) print(sorted(wordcount_x.items(), key=lambda x: x[1])[:n_show])</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_4"><head>In [ ]: import theano import theano.</head><label></label><figDesc>tensor as T # Theano uses symbolic calculations, # so we need to first create symbolic variables theano_x = T.scalar() # we define a relationship between a symbolic input and a symbolic output theano_y = T.maximum(0,theano_x) # now it's time for a symbolic gradient wrt. to symbolic variable x theano_nabla_y = T.grad(theano_y, theano_x) # we can see that both variables are symbolic, they don't have numerical values print(theano_x) print(theano_y) print(theano_nabla_y) # theano.function compiles the symbolic representation of the network theano_f_x = theano.function([theano_x], theano_y) print(theano_f_x(3)) print(theano_f_x(-3)) # and now for gradients nabla_f_x = theano.function([theano_x], theano_nabla_y) print(nabla_f_x(3)) print(nabla_f_x(-3))</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_5"><head>Figure 3 :</head><label>3</label><figDesc>Figure 3: Bag-Of-Words (BOW) representation of the input that is next follow by 'Softmax'.</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_6"><head>Figure 4 :</head><label>4</label><figDesc>Figure 4: Recurrent Neural Network.</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_7"><head>Figure 5 :</head><label>5</label><figDesc>Figure 5: A toy-sized ontology.</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_8"><head>Figure 6 :</head><label>6</label><figDesc>Figure 6: Features extractor. Neural responses of some layer to the visual input are considered as features. The following code gives visual features aligned with textual features. In [ ]: # this contains a list of the image names of our interest; # it also makes sure that visual and textual features are aligned correspondingly train_image_names = train_text_representation['img_name'] # the name for visual features that we use # CNN_NAME='vgg_net' # CNN_NAME='googlenet' CNN_NAME='fb_resnet' # the layer in CNN that is used to extract features # PERCEPTION_LAYER='fc7' # PERCEPTION_LAYER='pool5-7x7_s1' # PERCEPTION_LAYER='res5c-152' # l2 prefix since there are l2-normalized visual features PERCEPTION_LAYER='l2_res5c-152' train_visual_features = dp['perception']( train_or_test='train',</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_9"><head>Figure 7 :</head><label>7</label><figDesc>Figure 7: BOW with visual features.</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_10"><head>Figure 8 :</head><label>8</label><figDesc>Figure 8: RNN with visual features.</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_11"><head></head><label></label><figDesc>language_model.add(LSTM(self._config.hidden_state_dim, return_sequences=False)) visual_model = Sequential() if self._config.visual_embedding_dim &gt; 0: visual_model.add(Dense( self._config.visual_embedding_dim, input_shape=(self._config.visual_dim,))) else: visual_model.add(Layer(input_shape=(self._config.visual_dim,))) self.add(Merge([language_model, visual_model], mode=self._config.multimodal_merge_mode)) self.add(Dropout(0.5)) self.add(Dense(self._config.output_dim)) self.add(Activation('softmax')) # dimensionality of embeddings EMBEDDING_DIM = 500 # kind of multimodal fusion (ave, concat, mul, sum) MULTIMODAL_MERGE_MODE = 'sum'</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_12"><head></head><label></label><figDesc>[ ]: #TODO: Execute the following procedure (Shift+Enter) from kraino.utils import data_provider vqa_dp = data_provider.select['vqa-real_images-open_ended'] # VQA has a few answers associated with one question. # We take the most frequently occuring answers (single_frequent). # Formal argument 'keep_top_qa_pairs' allows to filter out # rare answers with the associated questions. # We use 0 as we want to keep all question answer pairs, # but you can change into 1000 and see how the results differ vqa_train_text_representation = vqa_dp['text']( train_or_test='train', answer_mode='single_frequent', keep_top_qa_pairs=1000) vqa_val_text_representation = vqa_dp['text']( train_or_test='val', answer_mode='single_frequent') In [ ]: from toolz import frequencies vqa_train_raw_x = vqa_train_text_representation['x'] vqa_train_raw_y = vqa_train_text_representation['y'] vqa_val_raw_x = vqa_val_text_representation['x'] vqa_val_raw_y = vqa_val_text_representation['y'] # we start from building the frequencies table vqa_wordcount_x = frequencies(' '.join(vqa_train_raw_x).split(' ')) # we can keep all answer words in the answer as a class # therefore we use an artificial split symbol '{' # to not split the answer into words # you can see the difference if you replace '{' # with ' ' and print vqa_wordcount_y vqa_wordcount_y = frequencies('{'.join(vqa_train_raw_y).split('{')) vqa_wordcount_y 10.0.22 Language-Only</figDesc></figure>
+
+			<note place="foot" n="1"> This tutorial was presented for the first time during the 2nd Summer School on Integrating Vision and Language: Deep Learning. 2 http://mpii.de/visual_turing_test 3 https://github.com/mateuszmalinowski/visual_turing_test-tutorial/blob/master/visual_ turing_test.ipynb 4 http://deeplearning.net/software/theano/ 5 https://keras.io 1</note>
+
+			<note place="foot" n="6"> For instance, http://deeplearning.net/tutorial/.</note>
+
+			<note place="foot" n="7"> http://karpathy.github.io/2015/05/21/rnn-effectiveness/</note>
+
+			<note place="foot" n="8"> http://wordnetweb.princeton.edu/perl/webwn 9 https://en.wikipedia.org/wiki/Synonym_ring</note>
+		</body>
+		<back>
+			<div type="annex">
+			</div>
+			<div type="references">
+
+				<listBibl>
+
+<biblStruct xml:id="b0">
+	<analytic>
+		<title level="a" type="main">Neural module networks</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Jacob</forename><surname>Andreas</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Marcus</forename><surname>Rohrbach</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Trevor</forename><surname>Darrell</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Dan</forename><surname>Klein</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">CVPR</title>
+		<imprint>
+			<date type="published" when="2016" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b1">
+	<monogr>
+				<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Stanislaw</forename><surname>Antol</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Aishwarya</forename><surname>Agrawal</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Jiasen</forename><surname>Lu</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Margaret</forename><surname>Mitchell</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Dhruv</forename><surname>Batra</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Lawrence</forename><surname>Zitnick</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Devi</forename><surname>Parikh</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><surname>Vqa</surname></persName>
+		</author>
+		<title level="m">Visual question answering. ICCV</title>
+		<imprint>
+			<date type="published" when="2015" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b2">
+	<monogr>
+				<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Frédéric</forename><surname>Bastien</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Pascal</forename><surname>Lamblin</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Razvan</forename><surname>Pascanu</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">James</forename><surname>Bergstra</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Ian</forename><forename type="middle">J</forename><surname>Goodfellow</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Arnaud</forename><surname>Bergeron</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Nicolas</forename><surname>Bouchard</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Yoshua</forename><surname>Bengio</surname></persName>
+		</author>
+		<title level="m">Theano: new features and speed improvements. Deep Learning and Unsupervised Feature Learning NIPS 2012 Workshop</title>
+		<imprint>
+			<date type="published" when="2012" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b3">
+	<analytic>
+		<title level="a" type="main">Learning phrase representations using rnn encoder-decoder for statistical machine translation</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Kyunghyun</forename><surname>Cho</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Bart</forename><surname>Van Merrienboer</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Caglar</forename><surname>Gulcehre</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Fethi</forename><surname>Bougares</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Holger</forename><surname>Schwenk</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Dzmitry</forename><surname>Bahdanau</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Yoshua</forename><surname>Bengio</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">EMNLP</title>
+		<imprint>
+			<date type="published" when="2014" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b4">
+	<monogr>
+		<title/>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Franois</forename><surname>Chollet</surname></persName>
+		</author>
+		<ptr target="https://github.com/fchollet/keras" />
+		<imprint>
+			<date type="published" when="2015" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b5">
+	<monogr>
+		<title/>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Christiane</forename><surname>Fellbaum</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><surname>Wordnet</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1999" />
+			<publisher>Wiley Online Library</publisher>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b6">
+	<monogr>
+		<title level="m" type="main">Multimodal compact bilinear pooling for visual question answering and visual grounding</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Akira</forename><surname>Fukui</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Dong</forename><forename type="middle">Huk</forename><surname>Park</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Daylen</forename><surname>Yang</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Anna</forename><surname>Rohrbach</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Trevor</forename><surname>Darrell</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Marcus</forename><surname>Rohrbach</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:1606.01847</idno>
+		<imprint>
+			<date type="published" when="2016" />
+		</imprint>
+	</monogr>
+<note type="report_type">arXiv preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b7">
+	<analytic>
+		<title level="a" type="main">Long short-term memory</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Sepp</forename><surname>Hochreiter</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Jürgen</forename><surname>Schmidhuber</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Neural Computation</title>
+		<imprint>
+			<date type="published" when="1997" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b8">
+	<monogr>
+		<title level="m" type="main">A focused dynamic attention model for visual question answering</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Ilija</forename><surname>Ilievski</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Shuicheng</forename><surname>Yan</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Jiashi</forename><surname>Feng</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:1604.01485</idno>
+		<imprint>
+			<date type="published" when="2016" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b9">
+	<monogr>
+				<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Yangqing</forename><surname>Jia</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Evan</forename><surname>Shelhamer</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Jeff</forename><surname>Donahue</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Sergey</forename><surname>Karayev</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Jonathan</forename><surname>Long</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Ross</forename><surname>Girshick</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Sergio</forename><surname>Guadarrama</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Trevor</forename><forename type="middle">Darrell</forename><surname>Caffe</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:1408.5093</idno>
+		<title level="m">Convolutional architecture for fast feature embedding</title>
+		<imprint>
+			<date type="published" when="2014" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b10">
+	<monogr>
+		<title level="m" type="main">Adam: A method for stochastic optimization</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Diederik</forename><surname>Kingma</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Jimmy</forename><surname>Ba</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:1412.6980</idno>
+		<imprint>
+			<date type="published" when="2014" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b11">
+	<monogr>
+		<title level="m" type="main">Hierarchical question-image co-attention for visual question answering</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Jiasen</forename><surname>Lu</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Jianwei</forename><surname>Yang</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Dhruv</forename><surname>Batra</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Devi</forename><surname>Parikh</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="2016" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b12">
+	<analytic>
+		<title level="a" type="main">A multi-world approach to question answering about real-world scenes based on uncertain input</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Mateusz</forename><surname>Malinowski</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Mario</forename><surname>Fritz</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">NIPS</title>
+		<imprint>
+			<date type="published" when="2014" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b13">
+	<analytic>
+		<title level="a" type="main">Towards a visual turing challenge</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Mateusz</forename><surname>Malinowski</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Mario</forename><surname>Fritz</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Learning Semantics (NIPS workshop)</title>
+		<imprint>
+			<date type="published" when="2014" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b14">
+	<analytic>
+		<title level="a" type="main">Hard to cheat: A turing test based on answering questions about images</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Mateusz</forename><surname>Malinowski</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Mario</forename><surname>Fritz</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">AAAI Workshop: Beyond the Turing Test</title>
+		<imprint>
+			<date type="published" when="2015" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b15">
+	<analytic>
+		<title level="a" type="main">Ask your neurons: A neural-based approach to answering questions about images</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Mateusz</forename><surname>Malinowski</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Marcus</forename><surname>Rohrbach</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Mario</forename><surname>Fritz</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">ICCV</title>
+		<imprint>
+			<date type="published" when="2015" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b16">
+	<monogr>
+		<title level="m" type="main">Ask your neurons: A deep learning approach to visual question answering</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Mateusz</forename><surname>Malinowski</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Marcus</forename><surname>Rohrbach</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Mario</forename><surname>Fritz</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:1605.02697</idno>
+		<imprint>
+			<date type="published" when="2016" />
+		</imprint>
+	</monogr>
+<note type="report_type">arXiv preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b17">
+	<monogr>
+		<title level="m" type="main">Wordnet: a lexical database for english</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><surname>George</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><surname>Miller</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1995" />
+			<publisher>CACM</publisher>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b18">
+	<analytic>
+		<title level="a" type="main">Mean box pooling: A rich image representation and output embedding for the visual madlibs task</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Mateusz</forename><surname>Ashkan Mokarian Forooshani</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Mario</forename><surname>Malinowski</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><surname>Fritz</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">BMVC</title>
+		<imprint>
+			<date type="published" when="2016" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b19">
+	<monogr>
+		<title/>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Olga</forename><surname>Russakovsky</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Jia</forename><surname>Deng</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Hao</forename><surname>Su</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Jonathan</forename><surname>Krause</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Sanjeev</forename><surname>Satheesh</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Sean</forename><surname>Ma</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Zhiheng</forename><surname>Huang</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Andrej</forename><surname>Karpathy</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Aditya</forename><surname>Khosla</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Michael</forename><surname>Bernstein</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Alexander</forename><forename type="middle">C</forename><surname>Berg</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Li</forename><surname>Fei-Fei</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:1409.0575</idno>
+		<imprint>
+			<date type="published" when="2014" />
+		</imprint>
+	</monogr>
+	<note>Imagenet large scale visual recognition challenge</note>
+</biblStruct>
+
+<biblStruct xml:id="b20">
+	<analytic>
+		<title level="a" type="main">Indoor segmentation and support inference from rgbd images</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Nathan</forename><surname>Silberman</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Derek</forename><surname>Hoiem</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Pushmeet</forename><surname>Kohli</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Rob</forename><surname>Fergus</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">ECCV</title>
+		<imprint>
+			<date type="published" when="2012" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b21">
+	<monogr>
+		<title level="m" type="main">Very deep convolutional networks for large-scale image recognition</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Karen</forename><surname>Simonyan</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Andrew</forename><surname>Zisserman</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:1409.1556</idno>
+		<imprint>
+			<date type="published" when="2014" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+				</listBibl>
+			</div>
+		</back>
+	</text>
+</TEI>

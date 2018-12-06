@@ -1,0 +1,846 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://www.tei-c.org/ns/1.0 C:\grobid-0.5.1\grobid-0.5.1\grobid-home/schemas/xsd/Grobid.xsd"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+	<teiHeader xml:lang="en">
+		<encodingDesc>
+			<appInfo>
+				<application version="0.5.1-SNAPSHOT" ident="GROBID" when="2018-11-08T09:31+0000">
+					<ref target="https://github.com/kermitt2/grobid">GROBID - A machine learning software for extracting information from scholarly documents</ref>
+				</application>
+			</appInfo>
+		</encodingDesc>
+		<fileDesc>
+			<titleStmt>
+				<title level="a" type="main">A Deep Reinforcement Learning Chatbot (Short Version)</title>
+			</titleStmt>
+			<publicationStmt>
+				<publisher/>
+				<availability status="unknown"><licence/></availability>
+				<date type="published" when="2018-01-20">20 Jan 2018</date>
+			</publicationStmt>
+			<sourceDesc>
+				<biblStruct>
+					<analytic>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Iulian</forename><forename type="middle">V</forename><surname>Serban</surname></persName>
+							<affiliation key="aff0">
+								<orgName type="institution">Montreal Institute for Learning Algorithms</orgName>
+								<address>
+									<settlement>Montreal</settlement>
+									<region>Quebec</region>
+									<country key="CA">Canada</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Chinnadhurai</forename><surname>Sankar</surname></persName>
+							<affiliation key="aff0">
+								<orgName type="institution">Montreal Institute for Learning Algorithms</orgName>
+								<address>
+									<settlement>Montreal</settlement>
+									<region>Quebec</region>
+									<country key="CA">Canada</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Mathieu</forename><surname>Germain</surname></persName>
+							<affiliation key="aff0">
+								<orgName type="institution">Montreal Institute for Learning Algorithms</orgName>
+								<address>
+									<settlement>Montreal</settlement>
+									<region>Quebec</region>
+									<country key="CA">Canada</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Saizheng</forename><surname>Zhang</surname></persName>
+							<affiliation key="aff0">
+								<orgName type="institution">Montreal Institute for Learning Algorithms</orgName>
+								<address>
+									<settlement>Montreal</settlement>
+									<region>Quebec</region>
+									<country key="CA">Canada</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Zhouhan</forename><surname>Lin</surname></persName>
+							<affiliation key="aff0">
+								<orgName type="institution">Montreal Institute for Learning Algorithms</orgName>
+								<address>
+									<settlement>Montreal</settlement>
+									<region>Quebec</region>
+									<country key="CA">Canada</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Sandeep</forename><surname>Subramanian</surname></persName>
+							<affiliation key="aff0">
+								<orgName type="institution">Montreal Institute for Learning Algorithms</orgName>
+								<address>
+									<settlement>Montreal</settlement>
+									<region>Quebec</region>
+									<country key="CA">Canada</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Taesup</forename><surname>Kim</surname></persName>
+							<affiliation key="aff0">
+								<orgName type="institution">Montreal Institute for Learning Algorithms</orgName>
+								<address>
+									<settlement>Montreal</settlement>
+									<region>Quebec</region>
+									<country key="CA">Canada</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Michael</forename><surname>Pieper</surname></persName>
+							<affiliation key="aff0">
+								<orgName type="institution">Montreal Institute for Learning Algorithms</orgName>
+								<address>
+									<settlement>Montreal</settlement>
+									<region>Quebec</region>
+									<country key="CA">Canada</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Sarath</forename><surname>Chandar</surname></persName>
+							<affiliation key="aff0">
+								<orgName type="institution">Montreal Institute for Learning Algorithms</orgName>
+								<address>
+									<settlement>Montreal</settlement>
+									<region>Quebec</region>
+									<country key="CA">Canada</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Nan</forename><forename type="middle">Rosemary</forename><surname>Ke</surname></persName>
+							<affiliation key="aff0">
+								<orgName type="institution">Montreal Institute for Learning Algorithms</orgName>
+								<address>
+									<settlement>Montreal</settlement>
+									<region>Quebec</region>
+									<country key="CA">Canada</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Sai</forename><surname>Rajeswar</surname></persName>
+							<affiliation key="aff0">
+								<orgName type="institution">Montreal Institute for Learning Algorithms</orgName>
+								<address>
+									<settlement>Montreal</settlement>
+									<region>Quebec</region>
+									<country key="CA">Canada</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Alexandre</forename><surname>De Brebisson</surname></persName>
+							<affiliation key="aff0">
+								<orgName type="institution">Montreal Institute for Learning Algorithms</orgName>
+								<address>
+									<settlement>Montreal</settlement>
+									<region>Quebec</region>
+									<country key="CA">Canada</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Jose</forename><forename type="middle">M R</forename><surname>Sotelo</surname></persName>
+							<affiliation key="aff0">
+								<orgName type="institution">Montreal Institute for Learning Algorithms</orgName>
+								<address>
+									<settlement>Montreal</settlement>
+									<region>Quebec</region>
+									<country key="CA">Canada</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Dendi</forename><surname>Suhubdy</surname></persName>
+							<affiliation key="aff0">
+								<orgName type="institution">Montreal Institute for Learning Algorithms</orgName>
+								<address>
+									<settlement>Montreal</settlement>
+									<region>Quebec</region>
+									<country key="CA">Canada</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Vincent</forename><surname>Michalski</surname></persName>
+							<affiliation key="aff0">
+								<orgName type="institution">Montreal Institute for Learning Algorithms</orgName>
+								<address>
+									<settlement>Montreal</settlement>
+									<region>Quebec</region>
+									<country key="CA">Canada</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Alexandre</forename><surname>Nguyen</surname></persName>
+							<affiliation key="aff0">
+								<orgName type="institution">Montreal Institute for Learning Algorithms</orgName>
+								<address>
+									<settlement>Montreal</settlement>
+									<region>Quebec</region>
+									<country key="CA">Canada</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Joelle</forename><surname>Pineau</surname></persName>
+							<affiliation key="aff0">
+								<orgName type="institution">Montreal Institute for Learning Algorithms</orgName>
+								<address>
+									<settlement>Montreal</settlement>
+									<region>Quebec</region>
+									<country key="CA">Canada</country>
+								</address>
+							</affiliation>
+						</author>
+						<author>
+							<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Yoshua</forename><surname>Bengio</surname></persName>
+							<affiliation key="aff0">
+								<orgName type="institution">Montreal Institute for Learning Algorithms</orgName>
+								<address>
+									<settlement>Montreal</settlement>
+									<region>Quebec</region>
+									<country key="CA">Canada</country>
+								</address>
+							</affiliation>
+						</author>
+						<title level="a" type="main">A Deep Reinforcement Learning Chatbot (Short Version)</title>
+					</analytic>
+					<monogr>
+						<imprint>
+							<date type="published" when="2018-01-20">20 Jan 2018</date>
+						</imprint>
+					</monogr>
+				</biblStruct>
+			</sourceDesc>
+		</fileDesc>
+		<profileDesc>
+			<abstract>
+				<p>We present MILABOT: a deep reinforcement learning chatbot developed by the Mon-treal Institute for Learning Algorithms (MILA) for the Amazon Alexa Prize competition. MILABOT is capable of conversing with humans on popular small talk topics through both speech and text. The system consists of an ensemble of natural language generation and retrieval models, including neural network and template-based models. By applying reinforcement learning to crowdsourced data and real-world user interactions, the system has been trained to select an appropriate response from the models in its ensemble. The system has been evaluated through A/B testing with real-world users, where it performed significantly better than other systems. The results highlight the potential of coupling ensemble systems with deep reinforcement learning as a fruitful path for developing real-world, open-domain conversational agents.</p>
+			</abstract>
+		</profileDesc>
+	</teiHeader>
+	<text xml:lang="en">
+		<body>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="1">Introduction</head><p>Conversational agents -including chatbots and personal assistants -are becoming increasingly ubiquitous. In 2016, Amazon proposed an international university competition with the goal of building a socialbot: a spoken conversational agent capable of conversing with humans on popular topics, such as entertainment, fashion, politics, sports, and technology. <ref type="bibr">3</ref> This article describes the experiments by the MILA Team at University of Montreal, with an emphasis on reinforcement learning.</p><p>Our socialbot is based on a large-scale ensemble system leveraging deep learning and reinforcement learning. The ensemble consists of deep learning models, template-based models and external API webservices for natural language retrieval and generation. We apply reinforcement learning -includ- ing value function and policy gradient methods -to intelligently combine an ensemble of retrieval and generation models. In particular, we propose a novel off-policy model-based reinforcement learning procedure, which yields substantial improvements in A/B testing experiments with real-world users.</p><p>On a rating scale 1−5, our best performing system reached an average user score of 3.15, while the average user score for all teams in the competition was only 2.92. <ref type="bibr">4</ref> Furthermore, our best performing system averaged 14.5−16.0 turns per conversation, which is significantly higher than all other systems. <ref type="bibr">1</ref> School of Computer Science, McGill University. <ref type="bibr">2 CIFAR Fellow. 3</ref> See https://developer.amazon.com/alexaprize. <ref type="bibr">4</ref> Throughout the semi-finals, we carried out several A/B testing experiments to evaluate different variants of our system (see Section 5). The score 3.15 is based on the best performing system in these experiments.</p><p>As shown in the A/B testing experiments, a key ingredient to achieving this performance is the application of off-policy deep reinforcement learning coupled with inductive biases, designed to improve the system's generalization ability by making a more efficient bias-variance tradeoff.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2">System Overview</head><p>Early work on dialogue systems <ref type="bibr" target="#b14">[Weizenbaum, 1966</ref><ref type="bibr" target="#b0">, Aust et al., 1995</ref><ref type="bibr" target="#b6">, McGlashan et al., 1992</ref><ref type="bibr" target="#b11">, Simpson and Eraser, 1993</ref> were based mainly on states and rules hand-crafted by human experts. Modern dialogue systems typically follow a hybrid architecture, which combines hand-crafted states and rules with statistical machine learning algorithms <ref type="bibr" target="#b12">[Suendermann-Oeft et al., 2015]</ref>. Due to the complexity of human language, however, it is impossible to enumerate all of the states and rules required for building a socialbot capable of conversing with humans on open-domain, popular topics. In contrast to such rule-based systems, our core approach is built entirely on statistical machine learning. We believe that this is the most plausible path to artificially intelligent conversational agents. The system architecture we propose aims to make as few assumptions as possible about the process of understanding and generating natural language. As such, the system utilizes only a small number of hand-crafted states and rules. Meanwhile, every system component has been designed to be optimized (trained) using machine learning algorithms. By optimizing these system components first independently on massive datasets and then jointly on real-world user interactions, the system will learn implicitly all relevant states and rules for conducting open-domain conversations. Given an adequate amount of examples, such a system should outperform any system based on states and rules hand-crafted by human experts. Further, the system will continue to improve in perpetuity with additional data. Our system architecture is inspired by the success of ensemble-based machine learning systems. These systems consist of many independent sub-models combined intelligently together. Examples of such ensemble systems include the winner of the Netflix Prize <ref type="bibr" target="#b2">[Koren et al., 2009]</ref>, the IBM Watson question- answering system <ref type="bibr" target="#b1">[Ferrucci et al., 2010]</ref> and Google's machine translation system <ref type="bibr" target="#b16">[Wu et al., 2016]</ref>.</p><p>Our system consists of an ensemble of response models (see <ref type="figure" target="#fig_0">Figure 1</ref>). Each response model takes as input a dialogue history and outputs a response in natural language text. As will be explained later, the response models have been engineered to generate responses on a diverse set of topics using a variety of strategies. The dialogue manager is responsible for combining the response models together. As input, the dialogue manager expects to be given a dialogue history (i.e. all utterances recorded in the dialogue so far, including the current user utterance) and confidence values of the automatic speech recognition system (ASR confidences). To generate a response, the dialogue manager follows a three-step procedure. First, it uses all response models to generate a set of candidate responses. Second, if there exists a priority response in the set of candidate responses (i.e. a response which takes precedence over other responses), this response will be returned by the system. For example, for the question "What is your name?", the response "I am an Alexa Prize socialbot" is a priority response. Third, if there are no priority responses, the response is selected by the model selection policy. For example, the model selection policy may select a response by scoring all candidate responses and picking the highest-scored response. </p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="3">Response Models</head><p>There are 22 response models in the system, including neural network based retrieval models, neural network based generative models, knowledge base question answering systems and template-based systems. Examples of candidate model responses are shown in <ref type="table" target="#tab_0">Table 1</ref> along with the model names. For a description of these models, the reader is referred to the technical report by Serban et al. <ref type="bibr">[2017]</ref>.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="4">Model Selection Policy</head><p>After generating the candidate response set, the dialogue manager uses a model selection policy to select the response it returns to the user. The dialogue manager must select a response which increases the satisfaction of the user for the entire dialogue. In order to do this, it must make a trade-off between immediate and long-term user satisfaction. For example, suppose the user asks to talk about politics. If the dialogue manager chooses to respond with a political joke, the user may be pleased for one turn. Afterwards, however, the user may be disappointed with the system's inability to debate political topics. Instead, if the dialogue manager chooses to respond with a short news statement, the user may be less pleased for one turn. However, this may influence the user to follow up with factual questions, which the system may be better adept at handling. To make the trade-off between immediate and long-term user satisfaction, we consider selecting the appropriate response as a sequential decision making problem. This section describes the five approaches we have investigated to learn the model selection policy. The approaches are evaluated with real-world users in the next section.</p><p>We use the reinforcement learning framework <ref type="bibr" target="#b13">[Sutton and Barto, 1998</ref>]. The dialogue manager is an agent, which takes actions in an environment in order to maximize rewards. For each time step t = 1,...,T , the agent observes the dialogue history h t and must choose one of K actions (responses): a Action-value Parametrization: We use two different approaches to parametrize the agent's policy. The first approach is based on an action-value function, defined by parameters θ:</p><formula xml:id="formula_0">Q θ (h t ,a k t ) ∈ R for k = 1,...,K,<label>(1)</label></formula><p>which estimates the expected discounted sum of rewards -referred to as the expected return -of taking action a k t (candidate response k) given dialogue history h t and given that the agent will continue to use the same policy afterwards. Given Q θ , the agent chooses the action with highest expected return:</p><formula xml:id="formula_1">π θ (h t ) = argmax Q θ (h t ,a k t ).<label>(2)</label></formula><p>k This approach is related to recent work by Lowe et al. <ref type="bibr">[2017]</ref> and Yu et al. <ref type="bibr">[2016]</ref>.</p><p>Stochastic Policy Parametrization: This approach instead parameterizes a distribution over actions:</p><formula xml:id="formula_2">λ −1 f θ (ht,a k t ) π θ (a k e t |h t ) = for k = 1,...,K,<label>(3)</label></formula><formula xml:id="formula_3">a t ) t e λ −1 f θ (ht,a</formula><p>where f θ (h t ,a k t ) is the scoring function, parametrized by θ, which assigns a scalar score to each response a k t conditioned on h t . The parameter λ controls the entropy of the distribution. The stochastic policy can be transformed to a deterministic (greedy) policy by selecting the action with highest probability:</p><formula xml:id="formula_4">π greedy θ (h t ) = argmax π θ (a k t |h t ).<label>(4)</label></formula><p>k We parametrize the scoring function and action-value function as neural networks with five layers. The first layer is the input, consisting of 1458 features representing both the dialogue history, h t , and the candidate response, a t . These features are based on a combination of word embeddings, dialogue acts, part-of-speech tags, unigram word overlap, bigram word overlap and model-specific features. <ref type="bibr">5</ref> The second layer contains 500 hidden units, computed by applying a linear transformation followed by the rectified linear activation function to the input layer features. The third layer contains 20 hidden units, computed by applying a linear transformation to the preceding layer units. The fourth layer contains 5 outputs units, which are probabilities (i.e. all values are positive and their sum equals one). These output units are computed by applying a linear transformation to the preceding layer units followed by a softmax transformation. This layer corresponds to the Amazon Mechanical Turk labels, described later. The fifth layer is the final output layer, which is a single scalar value computed by applying a linear transformation to the units in the third and fourth layers. In order to learn the parameters, we use five different machine learning approaches described next.</p><p>Supervised Learning with Crowdsourced Labels: The first approach to learning the policy param- eters is called Supervised Learning AMT. This approach estimates the action-value function Q θ using supervised learning on crowdsourced labels. It also serves as initialization for all other approaches.</p><p>We use Amazon Mechanical Turk (AMT) to collect data for training the policy. We follow a setup similar to Liu et al. <ref type="bibr">[2016]</ref>. We show human evaluators a dialogue along with 4 candidate responses, and ask them to score how appropriate each candidate response is on a 1-5 Likert-type scale. The score 1 indicates that the response is inappropriate or does not make sense, 3 indicates that the response is acceptable, and 5 indicates that the response is excellent and highly appropriate. As examples, we use a few thousand dialogues recorded between Alexa users and a preliminary version of the systems. The corresponding candidate responses are generated by the response models. In total, we collected 199,678 labels, which are split this into training (train), development (dev) and testing (test) datasets consisting of respectively 137,549, 23,298 and 38,831 labels each.</p><p>We optimize the model parameters θ w.r.t. log-likelihood (cross-entropy) using mini-batch stochastic gradient descent (SGD) to predict the 4th layer, which represents the AMT labels. Since we do not have labels for the last layer of the model, we fix the corresponding linear transformation parameters to Off-policy REINFORCE: Our next approach learns a stochastic policy directly from examples of dialogues recorded between the system and real-world users. Let {h  <ref type="bibr" target="#b15">[Williams, 1992</ref><ref type="bibr" target="#b8">, Precup, 2000</ref><ref type="bibr" target="#b9">, Precup et al., 2001</ref>, with learning rate α &gt; 0, which updates the policy parameters for each example (h</p><formula xml:id="formula_5">d t ,a d t ,R d } d,</formula><formula xml:id="formula_6">d t ,a d t ,R d ): d d ∆θ = α π θ (a t |h t ) π θ d (a d t |h d t ) ∇ θ log π θ (a d d t |h t ) R d .<label>(5)</label></formula><p>The intuition behind the algorithm is analogous to learning from trial and error. Examples with high user scores R d will increase the probability of the actions taken by the agent through the term</p><formula xml:id="formula_7">∇ θ log π θ (a d t |h d t ) R d .</formula><p>Vice versa, examples with low user scores will decrease the action probabilities. The ratio on the left-hand-side corrects for the discrepancy between the learned policy, π θ , and the policy under which the data was collected, π θ d . We evaluate the policy using an estimate of the expected return:</p><formula xml:id="formula_8">d d E π θ [R] ≈ π θ (a t |h R d . (6) d,t t ) π θ d (a d t |h d t )</formula><p>For training, we use over five thousand dialogues and scores collected in interactions between real users and a preliminary version of our system between June 30th to July 24th, 2017. We optimize the policy parameters on a training set with SGD based on eq. (5). We select hyper-parameters and early-stop on a development set based on eq. (6).</p><p>Learned Reward Function: Our two next approaches trains a linear regression model to predict the user score from a given dialogue. Given a dialogue history h t and a candidate response a t , the model g φ , with parameters φ, predicts the corresponding user score. As training data is scarce, we only use 23 higher-level features as input. The model is trained on the same dataset as Off-policy REINFORCE.</p><p>The regression model g φ is used in two ways. First, it is used to fine-tune the action-value function learned by Supervised Learning AMT to more accurately predict the user score. Specifically, the output layer is fine-tuned w.r.t. the squared-error between its own prediction and g φ . This new policy is called Supervised AMT Learned Reward. Second, the regression model is combined with Off-policy REINFORCE into a policy called Off-policy REINFORCE Learned Reward. This policy is trained as Off-policy REINFORCE, but where R d is replaced with the predicted user score g φ in eq. (5).</p><p>Q-learning with the Abstract Discourse Markov Decision Process: Our final approach is based on learning a policy through a simplified Markov decision process (MDP), called the Abstract Discourse MDP. This approach is somewhat similar to training with a user simulator. The MDP is fitted on the same dataset of dialogues and user scores as before. In particular, the per time-step reward function of the MDP is set to the score predicted by Supervised AMT. For a description of the MDP, the reader is referred to the technical report by Serban et al. <ref type="bibr">[2017]</ref>.</p><p>Given the Abstract Discourse MDP, we use Q-learning with experience replay to learn the policy with an action-value parametrization <ref type="bibr" target="#b7">[Mnih et al., 2013</ref><ref type="bibr" target="#b3">, Lin, 1993</ref>. We use an experience replay memory buffer of size 1000 and an exploration scheme with = 0.1. We experiment with discount factors γ ∈ {0.1,0.2,0.5}. Training is based on SGD and carried out in two alternating phases. For every 100 episodes of training, we evaluate the policy over 100 episodes w.r.t. average return. During evaluation, the dialogue histories are sampled from a separate set of dialogue histories. This ensures that the policy is not overfitting the finite set of dialogue histories. We select the policy which performs best w.r.t. average return. This policy is called Q-learning AMT. A quantitative analysis shows that the learned policy is more likely to select risky responses, perhaps because it has learned effective remediation or fall-back strategies .</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5">A/B Testing Experiments</head><p>We carry out A/B testing experiments to evaluate the dialogue manager policies for selecting the response model. When an Alexa user starts a conversation with the system, they are assigned at random to a policy and afterwards the dialogue and their score is recorded.</p><p>A major issue with the A/B testing experiments is that the distribution of Alexa users changes through time. Different types of users will be using the system depending on the time of day, weekday and holiday season. In addition, user expectations towards our system change as users interact with other socialbots in the competition. Therefore, we must take steps to reduce confounding factors and correlations between users. First, during each A/B testing experiment, we simultaneously evaluate all policies of interest. This ensures that we have approximately the same number of users interacting with each policy w.r.t. time of day and weekday. This minimizes the effect of the changing user distribution within each A/B testing period. Second, we discard scores from returning users (i.e. users who have already evaluated the system once). Users who are returning to the system are likely influenced by their previous interactions with the system. For example, users who had a positive previous experience may be biased towards giving higher scores in their next interaction.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5.1">Experiment Periods</head><p>Exp #1: The first A/B testing experiment was conducted between July 29th and August 6th, 2017. We tested the dialogue manager policies Supervised AMT, Supervised AMT Learned Reward, Off-policy REINFORCE, Off-policy REINFORCE Learned Reward and Q-learning AMT. We used the greedy variants for the Off-policy REINFORCE policies. We also tested a heuristic baseline policy Evibot + Alicebot, which selects the Evibot model response if available, and otherwise selects the Alicebot model response. Over a thousand user scores were collected with about two hundred user scores per policy.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>6</head><p>This experiment occurred in the middle of the competition semi-finals. In this period, users are likely to have relatively few expectations towards the systems in the competition (e.g. that the system can converse on a particular topic or engage in non-conversational activities, such as playing games). Further, the period July 29th -August 6th overlaps with the summer holidays in the United States. As such, we might expect more children to interact with system here than during other seasons.</p><p>Exp #2: The second A/B testing experiment was conducted between August 6th and August 15th, 2017. We tested the two policies Off-policy REINFORCE and Q-learning AMT. Prior to beginning the experiment, minor system improvements were carried out w.r.t. the Initiatorbot and filtering out profanities. In total, about six hundred user scores were collected per policy.</p><p>This experiment occurred at the end of the competition semi-finals. At this point, many users have already interacted with other socialbots in the competition, and are therefore likely to have developed expectations towards the systems (e.g. conversing on a particular topic or engaging in non-conversational activities, such as playing games). Further, the period August 6th -August 15th overlaps with the end of the summer holidays and the beginning of the school year in the United States. This means we should expect less children interacting than in the previous A/B testing experiment.</p><p>Exp #3: The third A/B testing experiment was carried out between August 15th, 2017 and August 21st, 2017. Due to the surprising results in the previous A/B testing experiment, we decided to continue testing the two policies Off-policy REINFORCE and Q-learning AMT. In total, about three hundred user ratings were collected after discarding returning users.</p><p>This experiment occurred after the end of the competition semi-finals. This means that it is likely that many Alexa users have already developed expectations towards the systems. Further, the period August 15th -August 21st lies entirely within the beginning of the school year in the United States. We might expect less children to interact with the system than in the previous A/B testing experiment. <ref type="table" target="#tab_2">Table 2</ref> shows the average Alexa user scores and average dialogue length, as well as average percentage of positive and negative user utterances according to a sentiment classifier. This is supported by the percentage of user utterances with positive and negative sentiment, where Q- learning AMT consistently obtained the lowest percentage of negative sentiment user utterances while maintaining a high percentage of positive sentiment user utterances. In comparison, the average user score for all the teams in the competition during the semi-finals was only 2.92. Next comes Off-policy REINFORCE, which performed best in the second experiment. In the second and third experiments, Off- policy REINFORCE also performed substantially better than all the other policies in the first experiment. Further, in the first experiment, Off-policy REINFORCE also achieved the longest dialogues with an average of 37.51/2 = 18.76 turns per dialogue. In comparison, the average number of turns per dialogue for all the teams in the competition during the semi-finals was only 11. 8 This means Off-policy REINFORCE has over 70% more turns on average than the other teams in the competition semi-finals. This is remarkable since it does not utilize non-conversational activities and has few negative user utterances. The remaining policies achieved average user scores between 2.74 and 2.86, suggesting that they have not learned to select responses more appropriately than the heuristic policy Evibot + Alicebot.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="5.2">Results &amp; Discussion</head><p>In addition, we computed several linguistic statistics for the policies in the first experiment. On average, the Q-learning AMT responses contained 1.98 noun phrases, while the Off-policy REINFORCE and Evibot + Alicebot responses contained only 1.45 and 1.05 noun phrases respectively. Further, on average, the Q-learning AMT responses had a word overlap with their immediate preceding user utterances of 11.28, while the Off-policy REINFORCE and Evibot + Alicebot responses had a word overlap of only 9.05 and 7.33 respectively. This suggests that Q-learning AMT has substantially more topical specificity (semantic content) and topical coherence (likelihood of staying on topic) compared to all other policies. As such, it seems likely that returning users would prefer this policy over others. This finding is consistent with the analysis showing that Q-learning AMT is more risk tolerant.</p><p>In conclusion, the two policies Q-learning AMT and Off-policy REINFORCE have demonstrated substantial improvements over all other policies. Further, the Q-learning AMT policy achieved an average Alexa user score substantially above the average of the all teams in the Amazon Alexa competition semi-finals. This strongly suggests that learning a policy through simulations in an Abstract Discourse MDP may serve as a fruitful path towards developing open-domain socialbots. The performance of Off-policy REINFORCE suggests that optimizing the policy directly towards user scores also may serve as a fruitful path. In particular, Off-policy REINFORCE obtained a substantial increase in the average number of turns in the dialogue compared to the average of all teams in the semi-finals, suggesting that the resulting conversations are significantly more interactive and engaging. Overall, the experiments demonstrate the advantages of the ensemble approach, where many different models output natural language responses and the system policy selects one response among them. With more interactions and data, the learned policies are bound to continue improving.</p></div>
+<div xmlns="http://www.tei-c.org/ns/1.0"><head n="6">Conclusion</head><p>We have proposed and evaluated a new large-scale ensemble-based dialogue system framework for the Amazon Alexa Prize competition. Our system leverages a variety of machine learning methods, includ- ing deep learning and reinforcement learning. We have developed a new set of deep learning models for natural language retrieval and generation, including deep learning models. Further, we have developed a novel reinforcement learning procedure and evaluated it against existing reinforcement learning meth- ods in A/B testing experiments with real-world Amazon Alexa users. These innovations have enabled us to make substantial improvements upon our baseline system. Our best performing system reached an average user score of 3.15, on a scale 1−5, with a minimal amount of hand-crafted states and rules and without engaging in non-conversational activities (such as playing games). In comparison, the average user score for all teams in the competition during the semi-finals was only 2.92. Furthermore, the same system averaged 14.5 − 16.0 turns per conversation, which is substantially higher than the average number of turns per conversation of all the teams in the semi-finals. This improvement in back-and-forth exchanges between the user and system suggests that our system is one of the most interactive and engaging systems in the competition. Since nearly all our system components are trainable machine learning models, the system is likely to improve greatly with more interactions and additional data.</p></div><figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_0"><head>Figure 1 :</head><label>1</label><figDesc>Figure 1: Dialogue manager control flow.</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_1"><head></head><label></label><figDesc>In this case, we assign a score of 1.0 for an inappropriate response, 3.0 for an acceptable response and 5.0 for an excellent response.</figDesc></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_0" validated="true"><head>Table 1 : Example dialogues and candidate responses generated by response models. The chosen system response is marked in bold.</head><label>1</label><figDesc></figDesc><table>Dialogue 
+Dialogue 
+SYSTEM: Hi. This is an Alexa Prize socialbot. 
+USER: Hi 
+SYSTEM: Do you have pets? 
+USER: Yes, I have two rabbits. 
+
+... 
+USER: Let's talk about movies. 
+SYSTEM: What's your favorite movie? 
+USER: star wars movie 
+
+Candidate Responses 
+Candidate Responses 
+BoWFactGenerator: Did you know that male 
+rabbits are called bucks, females are does? 
+GRUQuestionGenerator: 
+How about the American family of it? 
+Initiatorbot: 
+Do you believe in love at first sight? 
+LSTMClassifierMSMarco: 
+Mar 23, 2017 Two Parts: Learning 
+What to Feed Your Rabbit Learning How to ... 
+DualEncoderRedditNews: bye doggie 
+Alicebot: 
+Hurrah! Two is a good number of rabbits. 
+Elizabot: OK, but can you elaborate a bit? 
+VHREDRedditMovies: 
+Hmm. Nope, never heard of it. 
+VHREDSubtitles: Would you like to see them? 
+BoWWashingtonPost: 
+I do but I call people with dogs crazy also. 
+
+BoWFactGenerator: Here's an interesting fact. The 
+international telephone dialing code for Antarctica is 672. 
+GRUQuestionGenerator: how about your New York City? 
+Initiatorbot: How was your day? 
+LSTMClassifierMSMarco: 
+A third Anthology film will be released in 2020. 
+DualEncoderRedditNews: 
+Now whisper it to me , one more time bby. 
+Alicebot: What did you like about the robots in that movie? 
+Elizabot: How does that make you feel? 
+Evi: Star Wars movie a movie in the Star Wars series. 
+VHREDRedditMovies: 
+Oh please. Please. Pleeeease. Let this happen. 
+VHREDSubtitles: What? 
+BoWWashingtonPost: 
+A much more enjoyable feature than last year's 
+old-timer's convention masquerading as a star wars movie. 
+
+</table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_1" validated="false"><head>t be a set of examples, where d indicates the dialogue and t indicates the time step (turn). Let h d t be the dialogue history, a d t be the agent's action and R d be the observed return. Further, let θ d be the parameters of the stochastic policy π θt used during dialogue d. We use a re-weighted variant of the REINFORCE algorithm</head><label></label><figDesc></figDesc><table></table></figure>
+<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_2" validated="true"><head>Table 2 : A/B testing results (± 95% confidence intervals). Stars indicate statistical significance at 95%.</head><label>2</label><figDesc></figDesc><table>Policy 
+User score 
+Dialogue length Pos. utterances Neg. utterances 
+
+Exp #1 Evibot + Alicebot 
+2.86±0.22 
+31.84±6.02 
+2.80%±0.79 
+5.63%±1.27 
+Supervised AMT 
+2.80±0.21 
+34.94±8.07 
+4.00%±1.05 
+8.06%±1.38 
+
+Supervised AMT 
+Learned Reward 
+2.74±0.21 
+27.83±5.05 
+2.56%±0.70 
+6.46%±1.29 
+
+Off-policy REINFORCE 
+2.86±0.21 
+37.51±7.21 
+3.98%±0.80 
+6.25±1.28 
+
+Off-policy REINFORCE 
+Learned Reward 
+2.84±0.23 
+34.56±11.55 
+2.79%±0.76 
+6.90%±1.45 
+
+Q-learning AMT* 
+3.15±0.20 
+30.26±4.64 
+3.75%±0.93 
+5.41%±1.16 
+
+Exp #2 Off-policy REINFORCE 
+3.06±0.12 
+34.45±3.76 
+3.23%±0.45 
+7.97%±0.85 
+Q-learning AMT 
+2.92±0.12 
+31.84±3.69 
+3.38%±0.50 
+7.61%±0.84 
+
+Exp #3 Off-policy REINFORCE 
+3.03±0.18 
+30.93±4.96 
+2.72±0.59 
+7.36±1.22 
+Q-learning AMT 
+3.06±0.17 
+33.69±5.84 
+3.63±0.68 
+6.67±0.98 
+
+</table></figure>
+
+			<note place="foot" n="1"> t ,...,a K t. After taking an action, it receives a reward r t and is transferred to the next state h t+1 (which includes the action and the user&apos;s next response) where it is provided with a new set of K actions: a 1 t+1 ,...,a K t+1. The agent must maximize the discounted sum of rewards, R = T t=1 γ t r t , where γ ∈ (0,1] is a discount factor.</note>
+
+			<note place="foot" n="5"> To limit the effect of speech recognition errors in our experiments, ASR confidence features are not included.</note>
+
+			<note place="foot" n="7"> We observe that Q-learning AMT performed best among all policies w.r.t. Alexa user scores in the first and third experiments. In the first experiment, Q-learning AMT obtained an average user score of 3.15, which is significantly better than all other policies at a 95% significance level under a two-sample t-test. 6 To ensure high accuracy, human annotators were used to transcribe the audio related to the Alexa user scores for the first and second experiments. Amazon&apos;s speech recognition system was used in the third experiment. 7 95% confidence intervals are computed under the assumption that the Alexa user scores for each policy are drawn from a normal distribution with its own mean and variance.</note>
+
+			<note place="foot" n="8"> This number was reported by Amazon.</note>
+		</body>
+		<back>
+
+			<div type="acknowledgement">
+<div xmlns="http://www.tei-c.org/ns/1.0"><head>Acknowledgments</head><p>We thank Aaron Courville, Michael Noseworthy, Nicolas Angelard-Gontier, Ryan Lowe, Prasanna Parthasarathi and Peter Henderson for helpful feedback. We thank Christian Droulers for building the graphical user interface for text-based chat. We thank Amazon for providing Tesla K80 GPUs through the Amazon Web Services platform. Some Titan X GPUs used for this research were donated by the NVIDIA Corporation. The authors acknowledge NSERC, Canada Research Chairs, CIFAR, IBM Research, Nuance Foundation, Microsoft Maluuba and Druide Informatique Inc. for funding.</p></div>
+			</div>
+
+			<div type="references">
+
+				<listBibl>
+
+<biblStruct xml:id="b0">
+	<analytic>
+		<title level="a" type="main">The Philips automatic train timetable information system</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">H</forename><surname>Aust</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Oerder</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">F</forename><surname>Seide</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">V</forename><surname>Steinbiss</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Speech Communication</title>
+		<imprint>
+			<biblScope unit="volume">17</biblScope>
+			<biblScope unit="issue">3</biblScope>
+			<date type="published" when="1995" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b1">
+	<analytic>
+		<title level="a" type="main">Building Watson: An overview of the DeepQA project</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Ferrucci</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">E</forename><surname>Brown</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Chu-Carroll</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Fan</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Gondek</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><forename type="middle">A</forename><surname>Kalyanpur</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><surname>Lally</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><forename type="middle">W</forename><surname>Murdock</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">E</forename><surname>Nyberg</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Prager</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">AI magazine</title>
+		<imprint>
+			<biblScope unit="volume">31</biblScope>
+			<biblScope unit="issue">3</biblScope>
+			<date type="published" when="2010" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b2">
+	<analytic>
+		<title level="a" type="main">Matrix factorization techniques for recommender systems</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Y</forename><surname>Koren</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">R</forename><surname>Bell</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">C</forename><surname>Volinsky</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Computer</title>
+		<imprint>
+			<biblScope unit="volume">42</biblScope>
+			<biblScope unit="issue">8</biblScope>
+			<date type="published" when="2009" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b3">
+	<monogr>
+		<title level="m" type="main">Reinforcement learning for robots using neural networks</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">L.-J</forename><surname>Lin</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1993" />
+		</imprint>
+		<respStmt>
+			<orgName>Carnegie-Mellon Univ Pittsburgh PA School of Computer Science</orgName>
+		</respStmt>
+	</monogr>
+<note type="report_type">Technical report</note>
+</biblStruct>
+
+<biblStruct xml:id="b4">
+	<analytic>
+		<title level="a" type="main">How NOT to evaluate your dialogue system: An empirical study of unsupervised evaluation metrics for dialogue response generation</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">C.-W</forename><surname>Liu</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">R</forename><surname>Lowe</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">I</forename><forename type="middle">V</forename><surname>Serban</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Noseworthy</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">L</forename><surname>Charlin</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Pineau</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">EMNLP</title>
+		<imprint>
+			<date type="published" when="2016" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b5">
+	<analytic>
+		<title level="a" type="main">Towards an automatic Turing test: Learning to evaluate dialogue responses</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">R</forename><surname>Lowe</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Noseworthy</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">I</forename><forename type="middle">V</forename><surname>Serban</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">N</forename><surname>Angelard-Gontier</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Y</forename><surname>Bengio</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Pineau</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">ACL</title>
+		<imprint>
+			<date type="published" when="2017" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b6">
+	<analytic>
+		<title level="a" type="main">Dialogue management for telephone information systems</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>Mcglashan</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">N</forename><surname>Fraser</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">N</forename><surname>Gilbert</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">E</forename><surname>Bilange</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">P</forename><surname>Heisterkamp</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">N</forename><surname>Youd</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">ANLC</title>
+		<imprint>
+			<date type="published" when="1992" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b7">
+	<monogr>
+		<title level="m" type="main">Playing atari with deep reinforcement learning</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">V</forename><surname>Mnih</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">K</forename><surname>Kavukcuoglu</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Silver</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><surname>Graves</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">I</forename><surname>Antonoglou</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Wierstra</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Riedmiller</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:1312.5602</idno>
+		<imprint>
+			<date type="published" when="2013" />
+		</imprint>
+	</monogr>
+<note type="report_type">arXiv preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b8">
+	<analytic>
+		<title level="a" type="main">Eligibility traces for off-policy policy evaluation</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Precup</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Computer Science Department Faculty Publication Series</title>
+		<imprint>
+			<date type="published" when="2000" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b9">
+	<analytic>
+		<title level="a" type="main">Off-policy temporal-difference learning with function approximation</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Precup</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">R</forename><forename type="middle">S</forename><surname>Sutton</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>Dasgupta</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">ICML</title>
+		<imprint>
+			<date type="published" when="2001" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b10">
+	<monogr>
+		<title/>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">I</forename><forename type="middle">V</forename><surname>Serban</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">C</forename><surname>Sankar</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Germain</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>Zhang</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Z</forename><surname>Lin</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>Subramanian</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">T</forename><surname>Kim</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Pieper</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">S</forename><surname>Chandar</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">N</forename><forename type="middle">R</forename><surname>Ke</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:1709.02349</idno>
+		<imprint>
+			<date type="published" when="2017" />
+		</imprint>
+	</monogr>
+<note type="report_type">A Deep Reinforcement Learning Chatbot. arXiv preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b11">
+	<analytic>
+		<title level="a" type="main">Black box and glass box evaluation of the sundial system</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><surname>Simpson</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">N</forename><forename type="middle">M</forename><surname>Eraser</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Third European Conference on Speech Communication and Technology</title>
+		<imprint>
+			<date type="published" when="1993" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b12">
+	<analytic>
+		<title level="a" type="main">Halef: An open-source standard-compliant telephony-based modular spoken dialog system: A review and an outlook</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Suendermann-Oeft</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">V</forename><surname>Ramanarayanan</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Teckenbrock</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">F</forename><surname>Neutatz</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">D</forename><surname>Schmidt</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">Natural language dialog systems and intelligent assistants</title>
+		<imprint>
+			<publisher>Springer</publisher>
+			<date type="published" when="2015" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b13">
+	<monogr>
+		<title level="m" type="main">Reinforcement learning: An introduction</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">R</forename><forename type="middle">S</forename><surname>Sutton</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><forename type="middle">G</forename><surname>Barto</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1998" />
+			<publisher>MIT Press Cambridge</publisher>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b14">
+	<monogr>
+		<title level="m" type="main">Eliza-a computer program for the study of natural language communication between man and machine</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">J</forename><surname>Weizenbaum</surname></persName>
+		</author>
+		<imprint>
+			<date type="published" when="1966" />
+			<publisher>ACM</publisher>
+			<biblScope unit="volume">9</biblScope>
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b15">
+	<analytic>
+		<title level="a" type="main">Simple statistical gradient-following algorithms for connectionist reinforcement learning</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">R</forename><forename type="middle">J</forename><surname>Williams</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Machine learning</title>
+		<imprint>
+			<biblScope unit="volume">8</biblScope>
+			<biblScope unit="page" from="3" to="4" />
+			<date type="published" when="1992" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+<biblStruct xml:id="b16">
+	<monogr>
+		<title level="m" type="main">Google&apos;s neural machine translation system: Bridging the gap between human and machine translation</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Y</forename><surname>Wu</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Schuster</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Z</forename><surname>Chen</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Q</forename><forename type="middle">V</forename><surname>Le</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">M</forename><surname>Norouzi</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">W</forename><surname>Macherey</surname></persName>
+		</author>
+		<idno type="arXiv">arXiv:1609.08144</idno>
+		<imprint>
+			<date type="published" when="2016" />
+		</imprint>
+	</monogr>
+<note type="report_type">arXiv preprint</note>
+</biblStruct>
+
+<biblStruct xml:id="b17">
+	<analytic>
+		<title level="a" type="main">Strategy and policy learning for non-task-oriented conversational systems</title>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Z</forename><surname>Yu</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">Z</forename><surname>Xu</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><forename type="middle">W</forename><surname>Black</surname></persName>
+		</author>
+		<author>
+			<persName xmlns="http://www.tei-c.org/ns/1.0"><forename type="first">A</forename><forename type="middle">I</forename><surname>Rudnicky</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="m">SIGDIAL</title>
+		<imprint>
+			<date type="published" when="2016" />
+		</imprint>
+	</monogr>
+</biblStruct>
+
+				</listBibl>
+			</div>
+		</back>
+	</text>
+</TEI>

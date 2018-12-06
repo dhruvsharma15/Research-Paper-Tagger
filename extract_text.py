@@ -48,10 +48,10 @@ def fetchXMLfiles(source, destination):
             f.write('{}\n'.format(pdf_text))
 
 ##### path to the folder where all the XML files are stored #####
-source = "/media/dhruv/New Volume/courses_MS/data_analytics/project/xml_files/"
+source = "D:\\Study Material\\M.S\\FALL 18\\Data Analytics\\Project\\XML_Files\\"
 
 #### path where you want the text files to be stored ############
-destination = "/media/dhruv/New Volume/courses_MS/data_analytics/project/text_files/"
+destination = "D:\\Study Material\\M.S\\FALL 18\\Data Analytics\\Project\\text_Files\\"
 
 #### calling function for extraction process ####################
 fetchXMLfiles(source, destination)
