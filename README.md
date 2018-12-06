@@ -29,6 +29,10 @@ Create Anaconda environment and use the following commands to install the requir
 
 `pip install -r requirements.txt`
 
+Setup GROBID by following the steps at - 
+
+https://github.com/kermitt2/grobid
+
 All the Machine Learning Models in the directory ML_models can be run by their respective python scripts.
 
 ## Word2Vec Representation
