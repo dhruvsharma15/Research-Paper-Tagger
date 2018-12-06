@@ -1,4 +1,9 @@
-scikit-multilearn
 tensorflow
 glove-python
 nltk
+scikit-multilearn
+sklearn
+pandas
+nltk
+numpy
+gensim
