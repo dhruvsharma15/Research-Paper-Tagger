@@ -25,7 +25,7 @@ To Reproduce the results, setup [fastText](https://fasttext.cc/docs/en/support.h
 `./fasttext test model_da5.bin ../arxiv.pre.valid`
 
 ## Required Dependencies
-Use the following commands to install the required packages:
+Create Anaconda environment and use the following commands to install the required packages:
 
 `pip install -r requirements.txt`
 
